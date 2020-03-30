@@ -421,16 +421,18 @@ fprintf(fid, '%s\n\n\n', ddq2(5));
 fprintf(fid, '%s\n\n\n', ddq2(6));
 fprintf(fid, '%s\n\n\n', ddq2(7));
 
-% fprintf(fid, 'qdd equations CM 12\n');
-% fprintf(fid, '%s\n\n\n', ddq12(1));
-% fprintf(fid, '%s\n\n\n', ddq12(2));
-% fprintf(fid, '%s\n\n\n', ddq12(3));
-% fprintf(fid, '%s\n\n\n', ddq12(4));
-% fprintf(fid, '%s\n\n\n', ddq12(5));
-% fprintf(fid, '%s\n\n\n', ddq12(6));
-% fprintf(fid, '%s\n\n\n', ddq12(7));
+fprintf(fid, 'qdd equations CM 12\n');
+fprintf(fid, '%s\n\n\n', ddq12(1));
+fprintf(fid, '%s\n\n\n', ddq12(2));
+fprintf(fid, '%s\n\n\n', ddq12(3));
+fprintf(fid, '%s\n\n\n', ddq12(4));
+fprintf(fid, '%s\n\n\n', ddq12(5));
+fprintf(fid, '%s\n\n\n', ddq12(6));
+fprintf(fid, '%s\n\n\n', ddq12(7));
 
 fclose(fid);
+
+save('HybridMonkeyDynamics')
 
 disp('Saving dynamics to file completed.')
 
