@@ -440,61 +440,31 @@ disp('Saving dynamics to file completed.')
 
 disp('Starting reset maps...')
 
-syms dq1p dq2p dq3p dq4p dxp dyp dpp real
+sym dq1p dq2p dq3p dq4p dxp dyp dpp real
 
-dqp = [dq1p; dq2p; dq3p; dq4p; dxp; dyp; dpp];git
+dqp = [dq1p; dq2p; dq3p; dq4p; dxp; dyp; dpp];
 
 A = A1;
 [~, Mdag, Adag, LAM] = BlockInverse(M,A);
 
-Reset1 = simplify(dqp - Adag.'*Adag*dqp);
-
-disp('R1 done.')
+Reset1 = dqp - Adag.'*Adag*dqp;
 
 A = A2;
 [~, Mdag, Adag, LAM] = BlockInverse(M,A);
 
-Reset2 = simplify(dqp - Adag.'*Adag*dqp);
-
-disp('R2 done.')
+Reset2 = dqp - Adag.'*Adag*dqp;
 
 A = [A1; A2];
 [~, Mdag, Adag, LAM] = BlockInverse(M,A);
 
-Reset12 = simplify(dqp - Adag.'*Adag*dqp);
-
-disp('R12 done.')
+Reset12 = dqp - Adag.'*Adag*dqp;
 
 fid = fopen('HybridMonkeyResetMaps.txt', 'wt');
 
-fprintf(fid, 'Reset 1 \n');
-fprintf(fid, '%s\n\n\n', Reset1(1));
-fprintf(fid, '%s\n\n\n', Reset1(2));
-fprintf(fid, '%s\n\n\n', Reset1(3));
-fprintf(fid, '%s\n\n\n', Reset1(4));
-fprintf(fid, '%s\n\n\n', Reset1(5));
-fprintf(fid, '%s\n\n\n', Reset1(6));
-fprintf(fid, '%s\n\n\n', Reset1(7));
-
-fprintf(fid, 'Reset 2 \n');
-fprintf(fid, '%s\n\n\n', Reset2(1));
-fprintf(fid, '%s\n\n\n', Reset2(2));
-fprintf(fid, '%s\n\n\n', Reset2(3));
-fprintf(fid, '%s\n\n\n', Reset2(4));
-fprintf(fid, '%s\n\n\n', Reset2(5));
-fprintf(fid, '%s\n\n\n', Reset2(6));
-fprintf(fid, '%s\n\n\n', Reset2(7));
-
-fprintf(fid, 'Reset 12 \n');
-fprintf(fid, '%s\n\n\n', Reset12(1));
-fprintf(fid, '%s\n\n\n', Reset12(2));
-fprintf(fid, '%s\n\n\n', Reset12(3));
-fprintf(fid, '%s\n\n\n', Reset12(4));
-fprintf(fid, '%s\n\n\n', Reset12(5));
-fprintf(fid, '%s\n\n\n', Reset12(6));
-fprintf(fid, '%s\n\n\n', Reset12(7));
-
-fclose(fid);
+fprintf(fid, 'CM 1 x\n');
+fprintf(fid, '%s\n\n\n', a1(1));
+fprintf(fid, 'CM 1 y\n');
+fprintf(fid, '%s\n\n\n', a1(2));
 
 %% Functions
 
