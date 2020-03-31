@@ -357,9 +357,12 @@ disp('Calculating EOM for CM 1...')
 
 A = A1;
 Ad = A1d;
-[~, Mdag, Adag, LAM] = BlockInverse(M,A);
-ddq1 = simplify(Mdag*(Y - C*dq - N) - (Adag.'*Ad*dq));
-lam_out1 = simplify(Adag*(Y - C*dq - N) - (LAM*Ad*dq));
+[~, Mdag1, Adag1, LAM1] = BlockInverse(M,A);
+Mdag1 = simplify(Mdag1);
+Adag1 = simplify(Adag1);
+LAM1 = simplify(LAM1);
+% ddq1 = simplify(Mdag1*(Y - C*dq - N) - (Adag1.'*Ad*dq));
+% lam_out1 = simplify(Adag1*(Y - C*dq - N) - (LAM1*Ad*dq));
 
 disp('Calculating EOM for CM 1 Done.')
 
@@ -369,9 +372,12 @@ disp('Calculating EOM for CM 2...')
 
 A = A2;
 Ad = A2d;
-[~, Mdag, Adag, LAM] = BlockInverse(M,A);
-ddq2 = simplify(Mdag*(Y - C*dq - N) - (Adag.'*Ad*dq));
-lam_out2 = simplify(Adag*(Y - C*dq - N) - (LAM*Ad*dq));
+[~, Mdag2, Adag2, LAM2] = BlockInverse(M,A);
+Mdag2 = simplify(Mdag2);
+Adag2 = simplify(Adag2);
+LAM2 = simplify(LAM2);
+% ddq2 = simplify(Mdag2*(Y - C*dq - N) - (Adag2.'*Ad*dq));
+% lam_out2 = simplify(Adag2*(Y - C*dq - N) - (LAM2*Ad*dq));
 
 disp('Calculating EOM for CM 2 Done.')
 
@@ -381,60 +387,63 @@ disp('Calculating EOM for CM 12...')
 
 A = [A1; A2];
 Ad = [A1d; A2d];
-[~, Mdag, Adag, LAM] = BlockInverse(M,A);
-ddq12 = simplify(Mdag*(Y - C*dq - N) - (Adag.'*Ad*dq));
-lam_out12 = simplify(Adag*(Y - C*dq - N) - (LAM*Ad*dq));
+[~, Mdag12, Adag12, LAM12] = BlockInverse(M,A);
+Mdag12 = simplify(Mdag12);
+Adag12 = simplify(Adag12);
+LAM12 = simplify(LAM12);
+% ddq12 = simplify(Mdag12*(Y - C*dq - N) - (Adag12.'*Ad*dq));
+% lam_out12 = simplify(Adag12*(Y - C*dq - N) - (LAM12*Ad*dq));
 
 disp('Calculating EOM for CM 12 Done.')
 
 %%
 
-disp('Saving dynamics to file...')
-
-fid = fopen('HybridMonkeyDynamics.txt', 'wt');
-
-fprintf(fid, 'CM 1 x\n');
-fprintf(fid, '%s\n\n\n', a1(1));
-fprintf(fid, 'CM 1 y\n');
-fprintf(fid, '%s\n\n\n', a1(2));
-
-fprintf(fid, 'CM 2 x\n');
-fprintf(fid, '%s\n\n\n', a2(1));
-fprintf(fid, 'CM 2 y\n');
-fprintf(fid, '%s\n\n\n', a2(2));
-
-fprintf(fid, 'qdd equations CM 1 \n');
-fprintf(fid, '%s\n\n\n', ddq1(1));
-fprintf(fid, '%s\n\n\n', ddq1(2));
-fprintf(fid, '%s\n\n\n', ddq1(3));
-fprintf(fid, '%s\n\n\n', ddq1(4));
-fprintf(fid, '%s\n\n\n', ddq1(5));
-fprintf(fid, '%s\n\n\n', ddq1(6));
-fprintf(fid, '%s\n\n\n', ddq1(7));
-
-fprintf(fid, 'qdd equations CM 2\n');
-fprintf(fid, '%s\n\n\n', ddq2(1));
-fprintf(fid, '%s\n\n\n', ddq2(2));
-fprintf(fid, '%s\n\n\n', ddq2(3));
-fprintf(fid, '%s\n\n\n', ddq2(4));
-fprintf(fid, '%s\n\n\n', ddq2(5));
-fprintf(fid, '%s\n\n\n', ddq2(6));
-fprintf(fid, '%s\n\n\n', ddq2(7));
-
-fprintf(fid, 'qdd equations CM 12\n');
-fprintf(fid, '%s\n\n\n', ddq12(1));
-fprintf(fid, '%s\n\n\n', ddq12(2));
-fprintf(fid, '%s\n\n\n', ddq12(3));
-fprintf(fid, '%s\n\n\n', ddq12(4));
-fprintf(fid, '%s\n\n\n', ddq12(5));
-fprintf(fid, '%s\n\n\n', ddq12(6));
-fprintf(fid, '%s\n\n\n', ddq12(7));
-
-fclose(fid);
-
-save('HybridMonkeyDynamics')
-
-disp('Saving dynamics to file completed.')
+% disp('Saving dynamics to file...')
+% 
+% fid = fopen('HybridMonkeyDynamics.txt', 'wt');
+% 
+% fprintf(fid, 'CM 1 x\n');
+% fprintf(fid, '%s\n\n\n', a1(1));
+% fprintf(fid, 'CM 1 y\n');
+% fprintf(fid, '%s\n\n\n', a1(2));
+% 
+% fprintf(fid, 'CM 2 x\n');
+% fprintf(fid, '%s\n\n\n', a2(1));
+% fprintf(fid, 'CM 2 y\n');
+% fprintf(fid, '%s\n\n\n', a2(2));
+% 
+% fprintf(fid, 'qdd equations CM 1 \n');
+% fprintf(fid, '%s\n\n\n', ddq1(1));
+% fprintf(fid, '%s\n\n\n', ddq1(2));
+% fprintf(fid, '%s\n\n\n', ddq1(3));
+% fprintf(fid, '%s\n\n\n', ddq1(4));
+% fprintf(fid, '%s\n\n\n', ddq1(5));
+% fprintf(fid, '%s\n\n\n', ddq1(6));
+% fprintf(fid, '%s\n\n\n', ddq1(7));
+% 
+% fprintf(fid, 'qdd equations CM 2\n');
+% fprintf(fid, '%s\n\n\n', ddq2(1));
+% fprintf(fid, '%s\n\n\n', ddq2(2));
+% fprintf(fid, '%s\n\n\n', ddq2(3));
+% fprintf(fid, '%s\n\n\n', ddq2(4));
+% fprintf(fid, '%s\n\n\n', ddq2(5));
+% fprintf(fid, '%s\n\n\n', ddq2(6));
+% fprintf(fid, '%s\n\n\n', ddq2(7));
+% 
+% fprintf(fid, 'qdd equations CM 12\n');
+% fprintf(fid, '%s\n\n\n', ddq12(1));
+% fprintf(fid, '%s\n\n\n', ddq12(2));
+% fprintf(fid, '%s\n\n\n', ddq12(3));
+% fprintf(fid, '%s\n\n\n', ddq12(4));
+% fprintf(fid, '%s\n\n\n', ddq12(5));
+% fprintf(fid, '%s\n\n\n', ddq12(6));
+% fprintf(fid, '%s\n\n\n', ddq12(7));
+% 
+% fclose(fid);
+% 
+% save('HybridMonkeyDynamics')
+% 
+% disp('Saving dynamics to file completed.')
 
 %% Reset Maps
 
@@ -442,28 +451,51 @@ disp('Starting reset maps...')
 
 syms dq1p dq2p dq3p dq4p dxp dyp dpp real
 
-dqp = [dq1p; dq2p; dq3p; dq4p; dxp; dyp; dpp];git
+dqp = [dq1p; dq2p; dq3p; dq4p; dxp; dyp; dpp];
+
+%%
+
+disp('Starting R1...')
 
 A = A1;
-[~, Mdag, Adag, LAM] = BlockInverse(M,A);
 
-Reset1 = simplify(dqp - Adag.'*Adag*dqp);
+Reset1 = dqp - Adag1.'*Adag1*dqp;
+
+disp('Simplifying R1..')
+
+% Reset1 = simplify(Reset1);
 
 disp('R1 done.')
 
-A = A2;
-[~, Mdag, Adag, LAM] = BlockInverse(M,A);
+%%
 
-Reset2 = simplify(dqp - Adag.'*Adag*dqp);
+disp('Starting R2...')
+
+A = A2;
+
+Reset2 = dqp - Adag2.'*Adag2*dqp;
+
+disp('Simplifying R2..')
+
+% Reset2 = simplify(Reset2);
 
 disp('R2 done.')
 
-A = [A1; A2];
-[~, Mdag, Adag, LAM] = BlockInverse(M,A);
+%%
 
-Reset12 = simplify(dqp - Adag.'*Adag*dqp);
+disp('Starting R12...')
+
+A = [A1; A2];
+
+Reset12 = dqp - Adag12.'*Adag12*dqp;
+
+disp('Simplifying R12..')
+
+% Reset12 = simplify(Reset12);
 
 disp('R12 done.')
+
+%%
 
 fid = fopen('HybridMonkeyResetMaps.txt', 'wt');
 
