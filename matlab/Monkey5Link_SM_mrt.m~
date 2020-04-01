@@ -361,8 +361,8 @@ Ad = A1d;
 Mdag1 = simplify(Mdag1);
 Adag1 = simplify(Adag1);
 LAM1 = simplify(LAM1);
-ddq1 = simplify(Mdag1*(Y - C*dq - N) - (Adag1.'*Ad*dq));
-lam_out1 = simplify(Adag1*(Y - C*dq - N) - (LAM1*Ad*dq));
+% ddq1 = simplify(Mdag1*(Y - C*dq - N) - (Adag1.'*Ad*dq));
+% lam_out1 = simplify(Adag1*(Y - C*dq - N) - (LAM1*Ad*dq));
 
 disp('Calculating EOM for CM 1 Done.')
 
@@ -376,8 +376,8 @@ Ad = A2d;
 Mdag2 = simplify(Mdag2);
 Adag2 = simplify(Adag2);
 LAM2 = simplify(LAM2);
-ddq2 = simplify(Mdag2*(Y - C*dq - N) - (Adag2.'*Ad*dq));
-lam_out2 = simplify(Adag2*(Y - C*dq - N) - (LAM2*Ad*dq));
+% ddq2 = simplify(Mdag2*(Y - C*dq - N) - (Adag2.'*Ad*dq));
+% lam_out2 = simplify(Adag2*(Y - C*dq - N) - (LAM2*Ad*dq));
 
 disp('Calculating EOM for CM 2 Done.')
 
@@ -391,8 +391,8 @@ Ad = [A1d; A2d];
 Mdag12 = simplify(Mdag12);
 Adag12 = simplify(Adag12);
 LAM12 = simplify(LAM12);
-ddq12 = simplify(Mdag12*(Y - C*dq - N) - (Adag12.'*Ad*dq));
-lam_out12 = simplify(Adag12*(Y - C*dq - N) - (LAM12*Ad*dq));
+% % ddq12 = simplify(Mdag12*(Y - C*dq - N) - (Adag12.'*Ad*dq));
+% % lam_out12 = simplify(Adag12*(Y - C*dq - N) - (LAM12*Ad*dq));
 
 disp('Calculating EOM for CM 12 Done.')
 
