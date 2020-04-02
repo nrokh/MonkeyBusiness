@@ -495,6 +495,8 @@ disp('R12 done.')
 
 %%
 
+disp('Saving reset maps to file...')
+
 fid = fopen('HybridMonkeyResetMaps.txt', 'wt');
 
 fprintf(fid, 'Reset 1 \n');
@@ -527,6 +529,10 @@ fprintf(fid, '%s\n\n\n', Reset12(7));
 fclose(fid);
 
 save('HybridMonkeyDynamics')
+
+disp('Reset maps saved to file.')
+
+disp('Monkey dynamics completed.')
 
 %% Functions
 
