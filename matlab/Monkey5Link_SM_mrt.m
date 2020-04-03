@@ -1,4 +1,7 @@
 %% Set up problem
+
+tic
+
 clc
 clear all
 close all
@@ -528,11 +531,113 @@ fprintf(fid, '%s\n\n\n', Reset12(7));
 
 fclose(fid);
 
-save('HybridMonkeyDynamics')
-
 disp('Reset maps saved to file.')
 
+%% Equations for Animation
+
+disp('Generating equations for animation...')
+
+e1x = gwe1(1,3);
+e2x = gwe2(1,3);
+e3x = gwe3(1,3);
+e4x = gwe4(1,3);
+e5x = gwe5(1,3);
+sx = gws(1,3);
+
+e1y = gwe1(2,3);
+e2y = gwe2(2,3);
+e3y = gwe3(2,3);
+e4y = gwe4(2,3);
+e5y = gwe5(2,3);
+sy = gws(2,3);
+
+fid = fopen('HybridMonkeyAnimationEquations.txt', 'wt');
+
+fprintf(fid, 'x\n');
+fprintf(fid, '%s\n\n\n', e1x);
+fprintf(fid, '%s\n\n\n', e2x);
+fprintf(fid, '%s\n\n\n', e3x);
+fprintf(fid, '%s\n\n\n', e4x);
+fprintf(fid, '%s\n\n\n', e5x);
+fprintf(fid, '%s\n\n\n', sx);
+
+fprintf(fid, 'y\n');
+fprintf(fid, '%s\n\n\n', e1y);
+fprintf(fid, '%s\n\n\n', e2y);
+fprintf(fid, '%s\n\n\n', e3y);
+fprintf(fid, '%s\n\n\n', e4y);
+fprintf(fid, '%s\n\n\n', e5y);
+fprintf(fid, '%s\n\n\n', sy);
+
+fclose(fid);
+
+disp('Generating equations for animation completed.')
+
+%% Get Configurations
+
+disp('Solving monkey configurations...')
+
+g = struct();
+
+g.gws = matlabFunction(gws, 'vars', {q.'});
+g.gwe1 = matlabFunction(gwe1, 'vars', {q.'});
+g.gwe2 = matlabFunction(gwe2, 'vars', {q.'});
+g.gwe3 = matlabFunction(gwe3, 'vars', {q.'});
+g.gwe4 = matlabFunction(gwe4, 'vars', {q.'});
+g.gwe5 = matlabFunction(gwe5, 'vars', {q.'});
+
+mAngles = [-pi/8 pi/4 pi/8 -pi/4 0];
+
+a1_h = subs(a1,[q1 q2 q3 q4 p], mAngles);
+a2_h = subs(a2,[q1 q2 q3 q4 p], mAngles);
+
+% a1 only
+% x_config = double(solve(a1_h(1) == 0, x));
+% y_config = double(solve(a1_h(2) == 0, y));
+
+% a2 only
+% x_config = double(solve(a2_h(1) == 0, x));
+% y_config = double(solve(a2_h(2) == 0, y));
+
+% a1 and a2
+x_config = double(solve([a1_h(1) == 0, a2_h(1) == 0], x));
+y_config = double(solve([a1_h(2) == 0, a2_h(2) == 0], y));
+
+
+q_config = [mAngles(1:4) x_config y_config mAngles(5)];
+
+fprintf('[%f, %f, %f, %f, %f, %f, %f]\n',q_config(1), q_config(2), q_config(3), q_config(4), q_config(5), q_config(6), q_config(7))
+
+
+gws_h = g.gws(q_config);
+gwe1_h = g.gwe1(q_config); 
+gwe2_h = g.gwe2(q_config);
+gwe3_h = g.gwe3(q_config); 
+gwe4_h = g.gwe4(q_config);
+gwe5_h = g.gwe5(q_config);
+
+figure
+xlim([-1 1])
+ylim([-1.5 0.5])
+hold on
+plot([gwe5_h(1,3) gws_h(1,3)],[gwe5_h(2,3) gws_h(2,3)],'b-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+plot([gws_h(1,3) gwe1_h(1,3)],[gws_h(2,3) gwe1_h(2,3)],'k-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+plot([gws_h(1,3) gwe3_h(1,3)],[gws_h(2,3) gwe3_h(2,3)],'g-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+plot([gwe1_h(1,3) gwe2_h(1,3)],[gwe1_h(2,3) gwe2_h(2,3)],'m-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+plot([gwe3_h(1,3) gwe4_h(1,3)],[gwe3_h(2,3) gwe4_h(2,3)],'c-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+
+disp('Monkey configurations done.')
+
+%% Done
+
+disp('Saving workspace variables...')
+
+save('HybridMonkeyDynamics')
+
+disp('Workspace variables saved.')
 disp('Monkey dynamics completed.')
+
+toc
 
 %% Functions
 
