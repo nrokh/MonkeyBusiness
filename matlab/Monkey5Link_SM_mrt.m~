@@ -608,21 +608,35 @@ g.gwe3 = matlabFunction(gwe3, 'vars', {q.'});
 g.gwe4 = matlabFunction(gwe4, 'vars', {q.'});
 g.gwe5 = matlabFunction(gwe5, 'vars', {q.'});
 
-guess = [pi/5 0 pi/10 0 0 -0.7 0];
+% mAngles = [-pi/8 pi/4 -pi/8 pi/4 0];
 
-a1_h = subs(a1,[x y p], [guess(5:7)]);
-a2_h = subs(a2,[x y p], [guess(5:7)]);
+x_try = 0;
+y_try = -0.7;
+p_try = 0;
 
-a1_config = solve([a1_h(2) == 0 a1_h(1) == -0.2], [q1 q2]);
-a2_config = solve([a2_h(2) == 0 a2_h(1) == 0.2], [q3 q4]);
+% a1_h = subs(a1,[q1 q2 q3 q4 p], mAngles);
+% a2_h = subs(a2,[q1 q2 q3 q4 p], mAngles);
 
-q1_config = double(a1_config.q1(1));
-q2_config = double(a1_config.q2(1));
+a1_h = subs(a1,[x y p],[x_try y_try p_try]);
+a2_h = subs(a2,[x y p],[x_try y_try p_try]);
 
-q3_config = double(a2_config.q3(2));
-q4_config = double(a2_config.q4(2));
+% a1 only
+% x_config = double(solve(a1_h(1) == 0, x));
+% y_config = double(solve(a1_h(2) == 0, y));
 
-q_config = [q1_config q2_config q3_config q4_config guess(5) guess(6) guess(7)];
+% a2 only
+% x_config = double(solve(a2_h(1) == 0, x));
+% y_config = double(solve(a2_h(2) == 0, y));
+
+% a1 and a2
+config1 = solve([a1_h(1) == 0, a2_h(1) == 0], [q1, q2]);
+config2 = solve([a1_h(2) == 0, a2_h(2) == 0], [q1, q2]);
+
+x_config = double(solve([a1_h(1) == 0, a2_h(1) == 0], x));
+y_config = double(solve([a1_h(2) == 0, a2_h(2) == 0], y));
+
+
+q_config = [mAngles(1:4) x_config y_config mAngles(5)];
 
 fprintf('[%f, %f, %f, %f, %f, %f, %f]\n',q_config(1), q_config(2), q_config(3), q_config(4), q_config(5), q_config(6), q_config(7))
 
