@@ -608,13 +608,13 @@ g.gwe3 = matlabFunction(gwe3, 'vars', {q.'});
 g.gwe4 = matlabFunction(gwe4, 'vars', {q.'});
 g.gwe5 = matlabFunction(gwe5, 'vars', {q.'});
 
-guess = [pi/5 0 pi/10 0 0 -0.7 0];
+guess = [pi/5 0 pi/10 0 0.15 -0.7 0];
 
 a1_h = subs(a1,[x y p], [guess(5:7)]);
 a2_h = subs(a2,[x y p], [guess(5:7)]);
 
-a1_config = solve([a1_h(2) == 0 a1_h(1) == -0.2], [q1 q2]);
-a2_config = solve([a2_h(2) == 0 a2_h(1) == 0.2], [q3 q4]);
+a1_config = solve([a1_h(2) == 0 a1_h(1) == 0], [q1 q2]);
+a2_config = solve([a2_h(2) == 0 a2_h(1) == 0.3], [q3 q4]);
 
 q1_config = double(a1_config.q1(1));
 q2_config = double(a1_config.q2(1));
