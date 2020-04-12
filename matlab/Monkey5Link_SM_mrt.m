@@ -16,7 +16,7 @@ adj = @(g) [[g(1,1) g(1,2);g(2,1) g(2,2)] [g(2,3);-g(1,3)]; zeros(1,2) 1];
 % 2 arm monkey robot
 
 syms q1 q2 q3 q4 x y p dq1 dq2 dq3 dq4 dx dy dp ddq1 ddq2 ddq3 ddq4 ddx ddy ddp real
-% syms m1 m2 m3 m4 m5 I1 I2 I3 I4 I5 lb1 le1 lb2 le2 lb3 le3 lb4 le4 lb5 le5 real
+syms m1 m2 m3 m4 m5 I1 I2 I3 I4 I5 lb1 le1 lb2 le2 lb3 le3 lb4 le4 lb5 le5 real
 
 q = [q1; q2; q3; q4; x; y; p];
 dq = [dq1; dq2; dq3; dq4; dx; dy; dp];
@@ -24,53 +24,53 @@ ddq = [ddq1; ddq2; ddq3; ddq4; ddx; ddy; ddp];
 
 g = 9.81;
 
-BodyMass = 0.98871;
-ForeArmMass = 0.671;
-HumerousArmMass = 0.7739;
-
-BodyInertia = 2083824.597/1000/1000/1000;
-ForeArmInertia = 0.004;
-HumerousArmInertia = 0.00034;
-
-BodyTopLength = 0.03130;
-BodyBotLength = 0.1281 - BodyTopLength;
-
-ForeArmBotLength = 0.067;
-ForeArmTopLength = 0.171008;
-
-HumerousArmBotLength = 0.12432;
-HumerousArmTopLenght = 0.15901;
-
-m1 = HumerousArmMass;
-m3 = m1;
-
-m2 = ForeArmMass;
-m4 = m2;
-
-m5 = BodyMass;
-
-I1 = HumerousArmInertia;
-I3 = I1;
-
-I2 = ForeArmInertia;
-I4 = I2;
-
-I5 = BodyInertia;
-
-lb5 = BodyTopLength;
-le5 = BodyBotLength;
-
-lb1 = HumerousArmBotLength;
-le1 = HumerousArmTopLenght;
-
-lb3 = lb1;
-le3 = le1;
-
-lb2 = ForeArmBotLength;
-le2 = ForeArmTopLength;
-
-lb4 = lb2;
-le4 = le2;
+% BodyMass = 0.98871;
+% ForeArmMass = 0.671;
+% HumerousArmMass = 0.7739;
+% 
+% BodyInertia = 2083824.597/1000/1000/1000;
+% ForeArmInertia = 0.004;
+% HumerousArmInertia = 0.00034;
+% 
+% BodyTopLength = 0.03130;
+% BodyBotLength = 0.1281 - BodyTopLength;
+% 
+% ForeArmBotLength = 0.067;
+% ForeArmTopLength = 0.171008;
+% 
+% HumerousArmBotLength = 0.12432;
+% HumerousArmTopLenght = 0.15901;
+% 
+% m1 = HumerousArmMass;
+% m3 = m1;
+% 
+% m2 = ForeArmMass;
+% m4 = m2;
+% 
+% m5 = BodyMass;
+% 
+% I1 = HumerousArmInertia;
+% I3 = I1;
+% 
+% I2 = ForeArmInertia;
+% I4 = I2;
+% 
+% I5 = BodyInertia;
+% 
+% lb5 = BodyTopLength;
+% le5 = BodyBotLength;
+% 
+% lb1 = HumerousArmBotLength;
+% le1 = HumerousArmTopLenght;
+% 
+% lb3 = lb1;
+% le3 = le1;
+% 
+% lb2 = ForeArmBotLength;
+% le2 = ForeArmTopLength;
+% 
+% lb4 = lb2;
+% le4 = le2;
 
 %% Shou Model
 % m1 = 0.38;
@@ -647,54 +647,54 @@ disp('Generating equations for animation completed.')
 
 %% Get Configurations
 
-disp('Solving monkey configurations...')
-
-g = struct();
-
-g.gws = matlabFunction(gws, 'vars', {q.'});
-g.gwe1 = matlabFunction(gwe1, 'vars', {q.'});
-g.gwe2 = matlabFunction(gwe2, 'vars', {q.'});
-g.gwe3 = matlabFunction(gwe3, 'vars', {q.'});
-g.gwe4 = matlabFunction(gwe4, 'vars', {q.'});
-g.gwe5 = matlabFunction(gwe5, 'vars', {q.'});
-
-guess = [pi/5 0 pi/10 0 0.1 -0.535 0];
-
-a1_h = subs(a1,[x y p], [guess(5:7)]);
-a2_h = subs(a2,[x y p], [guess(5:7)]);
-
-a1_config = solve([a1_h(2) == 0 a1_h(1) == 0], [q1 q2]);
-a2_config = solve([a2_h(2) == 0 a2_h(1) == 0.2], [q3 q4]);
-
-q1_config = double(a1_config.q1(1));
-q2_config = double(a1_config.q2(1));
-
-q3_config = double(a2_config.q3(2));
-q4_config = double(a2_config.q4(2));
-
-q_config = [q1_config q2_config q3_config q4_config guess(5) guess(6) guess(7)];
-
-fprintf('[%f, %f, %f, %f, %f, %f, %f]\n',q_config(1), q_config(2), q_config(3), q_config(4), q_config(5), q_config(6), q_config(7))
-
-
-gws_h = g.gws(q_config);
-gwe1_h = g.gwe1(q_config); 
-gwe2_h = g.gwe2(q_config);
-gwe3_h = g.gwe3(q_config); 
-gwe4_h = g.gwe4(q_config);
-gwe5_h = g.gwe5(q_config);
-
-figure
-xlim([-1 1])
-ylim([-1.5 0.5])
-hold on
-plot([gwe5_h(1,3) gws_h(1,3)],[gwe5_h(2,3) gws_h(2,3)],'b-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
-plot([gws_h(1,3) gwe1_h(1,3)],[gws_h(2,3) gwe1_h(2,3)],'k-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
-plot([gws_h(1,3) gwe3_h(1,3)],[gws_h(2,3) gwe3_h(2,3)],'g-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
-plot([gwe1_h(1,3) gwe2_h(1,3)],[gwe1_h(2,3) gwe2_h(2,3)],'m-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
-plot([gwe3_h(1,3) gwe4_h(1,3)],[gwe3_h(2,3) gwe4_h(2,3)],'c-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
-
-disp('Monkey configurations done.')
+% disp('Solving monkey configurations...')
+% 
+% g = struct();
+% 
+% g.gws = matlabFunction(gws, 'vars', {q.'});
+% g.gwe1 = matlabFunction(gwe1, 'vars', {q.'});
+% g.gwe2 = matlabFunction(gwe2, 'vars', {q.'});
+% g.gwe3 = matlabFunction(gwe3, 'vars', {q.'});
+% g.gwe4 = matlabFunction(gwe4, 'vars', {q.'});
+% g.gwe5 = matlabFunction(gwe5, 'vars', {q.'});
+% 
+% guess = [pi/5 0 pi/10 0 0.1 -0.535 0];
+% 
+% a1_h = subs(a1,[x y p], [guess(5:7)]);
+% a2_h = subs(a2,[x y p], [guess(5:7)]);
+% 
+% a1_config = solve([a1_h(2) == 0 a1_h(1) == 0], [q1 q2]);
+% a2_config = solve([a2_h(2) == 0 a2_h(1) == 0.2], [q3 q4]);
+% 
+% q1_config = double(a1_config.q1(1));
+% q2_config = double(a1_config.q2(1));
+% 
+% q3_config = double(a2_config.q3(2));
+% q4_config = double(a2_config.q4(2));
+% 
+% q_config = [q1_config q2_config q3_config q4_config guess(5) guess(6) guess(7)];
+% 
+% fprintf('[%f, %f, %f, %f, %f, %f, %f]\n',q_config(1), q_config(2), q_config(3), q_config(4), q_config(5), q_config(6), q_config(7))
+% 
+% 
+% gws_h = g.gws(q_config);
+% gwe1_h = g.gwe1(q_config); 
+% gwe2_h = g.gwe2(q_config);
+% gwe3_h = g.gwe3(q_config); 
+% gwe4_h = g.gwe4(q_config);
+% gwe5_h = g.gwe5(q_config);
+% 
+% figure
+% xlim([-1 1])
+% ylim([-1.5 0.5])
+% hold on
+% plot([gwe5_h(1,3) gws_h(1,3)],[gwe5_h(2,3) gws_h(2,3)],'b-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+% plot([gws_h(1,3) gwe1_h(1,3)],[gws_h(2,3) gwe1_h(2,3)],'k-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+% plot([gws_h(1,3) gwe3_h(1,3)],[gws_h(2,3) gwe3_h(2,3)],'g-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+% plot([gwe1_h(1,3) gwe2_h(1,3)],[gwe1_h(2,3) gwe2_h(2,3)],'m-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+% plot([gwe3_h(1,3) gwe4_h(1,3)],[gwe3_h(2,3) gwe4_h(2,3)],'c-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+% 
+% disp('Monkey configurations done.')
 
 %% Done
 
