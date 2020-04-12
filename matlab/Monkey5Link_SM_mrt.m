@@ -26,11 +26,11 @@ g = 9.81;
 
 BodyMass = 0.98871;
 ForeArmMass = 0.671;
-HumerousArmMass = 0.7739;
+HumerousArmMass = 0.71647;
 
 BodyInertia = 2083824.597/1000/1000/1000;
 ForeArmInertia = 0.004;
-HumerousArmInertia = 0.00034;
+HumerousArmInertia = 0.00415;
 
 BodyTopLength = 0.03130;
 BodyBotLength = 0.1281 - BodyTopLength;
@@ -38,8 +38,8 @@ BodyBotLength = 0.1281 - BodyTopLength;
 ForeArmBotLength = 0.067;
 ForeArmTopLength = 0.171008;
 
-HumerousArmBotLength = 0.12432;
-HumerousArmTopLenght = 0.15901;
+HumerousArmBotLength = 0.07456;
+HumerousArmTopLenght = 0.0769;
 
 m1 = HumerousArmMass;
 m3 = m1;
@@ -658,7 +658,7 @@ g.gwe3 = matlabFunction(gwe3, 'vars', {q.'});
 g.gwe4 = matlabFunction(gwe4, 'vars', {q.'});
 g.gwe5 = matlabFunction(gwe5, 'vars', {q.'});
 
-guess = [pi/5 0 pi/10 0 0.05 -0.55 0];
+guess = [pi/5 0 pi/10 0 0.05 -0.415 0];
 
 a1_h = subs(a1,[x y p], [guess(5:7)]);
 a2_h = subs(a2,[x y p], [guess(5:7)]);
