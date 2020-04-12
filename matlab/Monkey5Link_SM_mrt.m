@@ -260,7 +260,7 @@ V = m1*g*gwl1(2,3) + m2*g*gwl2(2,3) + m3*g*gwl3(2,3) + m4*g*gwl4(2,3) + m5*g*y;
 
 N = simplify([diff(V,q1); diff(V,q2); diff(V,q3); diff(V,q4); diff(V,x); diff(V,y); diff(V,p)]);
 
-b = 0.1; % 0.1 for good steady sim
+b = 0; % 0.1 for good steady sim
 
 N = N + [b*dq1; b*dq2; b*dq3; b*dq4; 0; 0; 0];
 
