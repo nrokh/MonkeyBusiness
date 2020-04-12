@@ -13,43 +13,94 @@ disp('Set up...')
 vee = @(mat) [mat(1,3); mat(2,3); mat(2,1)];
 adj = @(g) [[g(1,1) g(1,2);g(2,1) g(2,2)] [g(2,3);-g(1,3)]; zeros(1,2) 1];
 
-% 2 arm monkey robot assuming fixed pin joint
+% 2 arm monkey robot
 
-syms q1 q2 q3 q4 x y p dq1 dq2 dq3 dq4 dx dy dp real
+syms q1 q2 q3 q4 x y p dq1 dq2 dq3 dq4 dx dy dp ddq1 ddq2 ddq3 ddq4 ddx ddy ddp real
+syms m1 m2 m3 m4 m5 I1 I2 I3 I4 I5 lb1 le1 lb2 le2 lb3 le3 lb4 le4 lb5 le5 real
 
 q = [q1; q2; q3; q4; x; y; p];
 dq = [dq1; dq2; dq3; dq4; dx; dy; dp];
+ddq = [ddq1; ddq2; ddq3; ddq4; ddx; ddy; ddp];
 
 g = 9.81;
 
-m1 = 0.38;
-m2 = m1;
-m3 = m1;
-m4 = m1;
-m5 = 2.1;
+% BodyMass = 0.98871;
+% ForeArmMass = 0.711;
+% HumerousArmMass = 0.7739;
+% 
+% BodyInertia = 2083824.597/1000/1000/1000;
+% ForeArmInertia = 0.0095;
+% HumerousArmInertia = 0.00034;
+% 
+% BodyTopLength = 0.03130;
+% BodyBotLength = 0.1281 - BodyTopLength;
+% 
+% ForeArmBotLength = 0.100326;
+% ForeArmTopLength = 0.228009;
+% 
+% HumerousArmBotLength = 0.12432;
+% HumerousArmTopLenght = 0.15901;
+% 
+% m1 = HumerousArmMass;
+% m3 = m1;
+% 
+% m2 = ForeArmMass;
+% m4 = m2;
+% 
+% m5 = BodyMass;
+% 
+% I1 = HumerousArmInertia;
+% I3 = I1;
+% 
+% I2 = ForeArmInertia;
+% I4 = I2;
+% 
+% I5 = BodyInertia;
+% 
+% lb5 = BodyTopLength;
+% le5 = BodyBotLength;
+% 
+% lb1 = HumerousArmBotLength;
+% le1 = HumerousArmTopLenght;
+% 
+% lb3 = lb1;
+% le3 = le1;
+% 
+% lb2 = ForeArmBotLength;
+% le2 = ForeArmTopLength;
+% 
+% lb4 = lb2;
+% le4 = le2;
 
-l1 = 0.3;
-l2 = 0.3;
-l3 = 0.3;
-l4 = 0.3;
-l5 = 0.3;
-
-I1 = m1*l1^2/12;
-I2 = m2*l2^2/12;
-I3 = m3*l3^2/12;
-I4 = m4*l4^2/12;
-I5 = m5*l5^2/12;
-
-lb1 = l1/2;
-le1 = l1/2;
-lb2 = l2/2;
-le2 = l2/2;
-lb3 = l3/2;
-le3 = l3/2;
-lb4 = l4/2;
-le4 = l4/2;
-lb5 = l5/2;
-le5 = l5/2;
+%% Shou Model
+% m1 = 0.38;
+% m2 = 0.38;
+% m3 = m1;
+% m4 = m2;
+% m5 = 2.1;
+% 
+% l1 = 0.3;
+% l2 = 0.3;
+% l3 = 0.3;
+% l4 = 0.3;
+% l5 = 0.3;
+% 
+% I1 = m1*l1^2/12;
+% I2 = m2*l2^2/12;
+% I3 = m3*l3^2/12;
+% I4 = m4*l4^2/12;
+% I5 = m5*l5^2/12;
+% 
+% lb1 = l1/2;
+% le1 = l1/2;
+% lb2 = l2/2;
+% le2 = l2/2;
+% lb3 = l3/2;
+% le3 = l3/2;
+% lb4 = l4/2;
+% le4 = l4/2;
+% lb5 = l5/2;
+% le5 = l5/2;
 
 disp('Set up done.')
 
@@ -209,7 +260,7 @@ V = m1*g*gwl1(2,3) + m2*g*gwl2(2,3) + m3*g*gwl3(2,3) + m4*g*gwl4(2,3) + m5*g*y;
 
 N = simplify([diff(V,q1); diff(V,q2); diff(V,q3); diff(V,q4); diff(V,x); diff(V,y); diff(V,p)]);
 
-b = 0; % 0.1 for good steady sim
+b = 0.1; % 0.1 for good steady sim
 
 N = N + [b*dq1; b*dq2; b*dq3; b*dq4; 0; 0; 0];
 
@@ -358,151 +409,145 @@ disp('Lam matrix done.')
 
 disp('Calculating EOM for CM 1...')
 
-A = A1;
-Ad = A1d;
-[~, Mdag1, Adag1, LAM1] = BlockInverse(M,A);
-Mdag1 = simplify(Mdag1);
-Adag1 = simplify(Adag1);
-LAM1 = simplify(LAM1);
-ddq1 = simplify(Mdag1*(Y - C*dq - N) - (Adag1.'*Ad*dq));
-lam_out1 = simplify(Adag1*(Y - C*dq - N) - (LAM1*Ad*dq));
+CM1_EOMs = simplify(M*ddq + C*dq + N - A1.'*lam1 - Y);
 
 disp('Calculating EOM for CM 1 Done.')
 
-%%
-
 disp('Calculating EOM for CM 2...')
 
-A = A2;
-Ad = A2d;
-[~, Mdag2, Adag2, LAM2] = BlockInverse(M,A);
-Mdag2 = simplify(Mdag2);
-Adag2 = simplify(Adag2);
-LAM2 = simplify(LAM2);
-ddq2 = simplify(Mdag2*(Y - C*dq - N) - (Adag2.'*Ad*dq));
-lam_out2 = simplify(Adag2*(Y - C*dq - N) - (LAM2*Ad*dq));
+CM2_EOMs = simplify(M*ddq + C*dq + N - A2.'*lam2 - Y);
 
 disp('Calculating EOM for CM 2 Done.')
 
-%%
-
 disp('Calculating EOM for CM 12...')
 
-A = [A1; A2];
-Ad = [A1d; A2d];
-[~, Mdag12, Adag12, LAM12] = BlockInverse(M,A);
-Mdag12 = simplify(Mdag12);
-Adag12 = simplify(Adag12);
-LAM12 = simplify(LAM12);
-ddq12 = simplify(Mdag12*(Y - C*dq - N) - (Adag12.'*Ad*dq));
-lam_out12 = simplify(Adag12*(Y - C*dq - N) - (LAM12*Ad*dq));
+A12 = [A1; A2];
+CM12_EOMs = simplify(M*ddq + C*dq + N - A12.'*lam12 - Y);
 
 disp('Calculating EOM for CM 12 Done.')
 
-%%
+disp('Contact constraints starting...')
 
-disp('Saving dynamics to file...')
+VConstraint1 = A1*dq;
+AConstraint1 = A1*ddq + A1d*dq;
 
-fid = fopen('HybridMonkeyDynamics.txt', 'wt');
+VConstraint2 = A2*dq;
+AConstraint2 = A2*ddq + A2d*dq;
 
-fprintf(fid, 'CM 1 x\n');
-fprintf(fid, '%s\n\n\n', a1(1));
-fprintf(fid, 'CM 1 y\n');
-fprintf(fid, '%s\n\n\n', a1(2));
+Vel_constraint1X = VConstraint1(1);
+Vel_constraint1Y = VConstraint1(2);
 
-fprintf(fid, 'CM 2 x\n');
-fprintf(fid, '%s\n\n\n', a2(1));
-fprintf(fid, 'CM 2 y\n');
-fprintf(fid, '%s\n\n\n', a2(2));
+Acl_constraint1X = AConstraint1(1);
+Acl_constraint1Y = AConstraint1(2);
 
-fprintf(fid, 'qdd equations CM 1 \n');
-fprintf(fid, '%s\n\n\n', ddq1(1));
-fprintf(fid, '%s\n\n\n', ddq1(2));
-fprintf(fid, '%s\n\n\n', ddq1(3));
-fprintf(fid, '%s\n\n\n', ddq1(4));
-fprintf(fid, '%s\n\n\n', ddq1(5));
-fprintf(fid, '%s\n\n\n', ddq1(6));
-fprintf(fid, '%s\n\n\n', ddq1(7));
+Vel_constraint2X = VConstraint2(1);
+Vel_constraint2Y = VConstraint2(2);
 
-fprintf(fid, 'qdd equations CM 2\n');
-fprintf(fid, '%s\n\n\n', ddq2(1));
-fprintf(fid, '%s\n\n\n', ddq2(2));
-fprintf(fid, '%s\n\n\n', ddq2(3));
-fprintf(fid, '%s\n\n\n', ddq2(4));
-fprintf(fid, '%s\n\n\n', ddq2(5));
-fprintf(fid, '%s\n\n\n', ddq2(6));
-fprintf(fid, '%s\n\n\n', ddq2(7));
+Acl_constraint2X = AConstraint2(1);
+Acl_constraint2Y = AConstraint2(2);
 
-fprintf(fid, 'qdd equations CM 12\n');
-fprintf(fid, '%s\n\n\n', ddq12(1));
-fprintf(fid, '%s\n\n\n', ddq12(2));
-fprintf(fid, '%s\n\n\n', ddq12(3));
-fprintf(fid, '%s\n\n\n', ddq12(4));
-fprintf(fid, '%s\n\n\n', ddq12(5));
-fprintf(fid, '%s\n\n\n', ddq12(6));
-fprintf(fid, '%s\n\n\n', ddq12(7));
+disp('Contact constraints finished.')
 
-fclose(fid);
-
-disp('Saving dynamics to file completed.')
+%% disp('Calculating EOM for CM 1...')
+% 
+% A = A1;
+% Ad = A1d;
+% [~, Mdag1, Adag1, LAM1] = BlockInverse(M,A);
+% Mdag1 = simplify(Mdag1);
+% Adag1 = simplify(Adag1);
+% LAM1 = simplify(LAM1);
+% ddq1 = simplify(Mdag1*(Y - C*dq - N) - (Adag1.'*Ad*dq));
+% lam_out1 = simplify(Adag1*(Y - C*dq - N) - (LAM1*Ad*dq));
+% 
+% disp('Calculating EOM for CM 1 Done.')
+% 
+% %%
+% 
+% disp('Calculating EOM for CM 2...')
+% 
+% A = A2;
+% Ad = A2d;
+% [~, Mdag2, Adag2, LAM2] = BlockInverse(M,A);
+% Mdag2 = simplify(Mdag2);
+% Adag2 = simplify(Adag2);
+% LAM2 = simplify(LAM2);
+% ddq2 = simplify(Mdag2*(Y - C*dq - N) - (Adag2.'*Ad*dq));
+% lam_out2 = simplify(Adag2*(Y - C*dq - N) - (LAM2*Ad*dq));
+% 
+% disp('Calculating EOM for CM 2 Done.')
+% 
+% %%
+% 
+% disp('Calculating EOM for CM 12...')
+% 
+% A = [A1; A2];
+% Ad = [A1d; A2d];
+% [~, Mdag12, Adag12, LAM12] = BlockInverse(M,A);
+% Mdag12 = simplify(Mdag12);
+% Adag12 = simplify(Adag12);
+% LAM12 = simplify(LAM12);
+% ddq12 = simplify(Mdag12*(Y - C*dq - N) - (Adag12.'*Ad*dq));
+% lam_out12 = simplify(Adag12*(Y - C*dq - N) - (LAM12*Ad*dq));
+% 
+% disp('Calculating EOM for CM 12 Done.')
 
 %% Reset Maps
 
 disp('Starting reset maps...')
 
-syms dq1p dq2p dq3p dq4p dxp dyp dpp real
+syms dq1m dq2m dq3m dq4m dxm dym dpm phat1x phat1y phat2x phat2y real
 
-dqp = [dq1p; dq2p; dq3p; dq4p; dxp; dyp; dpp];
+phat1 = [phat1x; phat1y];
+phat2 = [phat2x; phat2y];
+phat12 = [phat1; phat2];
 
-%%
+dqm = [dq1m; dq2m; dq3m; dq4m; dxm; dym; dpm];
 
-disp('Starting R1...')
+Reset1 = M*(dq - dqm) + A1.'*phat1;
 
-A = A1;
+Reset2 = M*(dq - dqm) + A2.'*phat2;
 
-Reset1 = dqp - Adag1.'*A*dqp;
+Reset12 = M*(dq - dqm) + A12.'*phat12;
 
-disp('Simplifying R1..')
+disp('Reset maps done.')
 
-Reset1 = simplify(Reset1);
+%% Save to File
 
-disp('R1 done.')
+disp('Saving dynamics to file...')
 
-%%
+fid = fopen('HybridMonkeyDynamics.txt', 'wt');
 
-disp('Starting R2...')
+fprintf(fid, 'CM 1 ax\n');
+fprintf(fid, '%s\n\n\n', a1(1));
+fprintf(fid, 'CM 1 ay\n');
+fprintf(fid, '%s\n\n\n', a1(2));
 
-A = A2;
+fprintf(fid, 'CM 1 Ax*dq\n');
+fprintf(fid, '%s\n\n\n', Vel_constraint1X);
+fprintf(fid, 'CM 1 Ay*dq\n');
+fprintf(fid, '%s\n\n\n', Vel_constraint1Y);
 
-Reset2 = dqp - Adag2.'*A*dqp;
+fprintf(fid, 'CM 1 Ax*ddq + Adx*dq\n');
+fprintf(fid, '%s\n\n\n', Acl_constraint1X);
+fprintf(fid, 'CM 1 Ay*ddq + Ady*dq\n');
+fprintf(fid, '%s\n\n\n', Acl_constraint1Y);
 
-disp('Simplifying R2..')
+fprintf(fid, 'CM 2 ax\n');
+fprintf(fid, '%s\n\n\n', a2(1));
+fprintf(fid, 'CM 2 ay\n');
+fprintf(fid, '%s\n\n\n', a2(2));
 
-Reset2 = simplify(Reset2);
+fprintf(fid, 'CM 2 Ax*dq\n');
+fprintf(fid, '%s\n\n\n', Vel_constraint2X);
+fprintf(fid, 'CM 2 Ay*dq\n');
+fprintf(fid, '%s\n\n\n', Vel_constraint2Y);
 
-disp('R2 done.')
+fprintf(fid, 'CM 2 Ax*ddq + Adx*dq\n');
+fprintf(fid, '%s\n\n\n', Acl_constraint2X);
+fprintf(fid, 'CM 2 Ay*ddq + Ady*dq\n');
+fprintf(fid, '%s\n\n\n', Acl_constraint2Y);
 
-%%
-
-disp('Starting R12...')
-
-A = [A1; A2];
-
-Reset12 = dqp - Adag12.'*A*dqp;
-
-disp('Simplifying R12..')
-
-Reset12 = simplify(Reset12);
-
-disp('R12 done.')
-
-%%
-
-disp('Saving reset maps to file...')
-
-fid = fopen('HybridMonkeyResetMaps.txt', 'wt');
-
-fprintf(fid, 'Reset 1 \n');
+fprintf(fid, 'Reset to CM1\n');
 fprintf(fid, '%s\n\n\n', Reset1(1));
 fprintf(fid, '%s\n\n\n', Reset1(2));
 fprintf(fid, '%s\n\n\n', Reset1(3));
@@ -511,7 +556,7 @@ fprintf(fid, '%s\n\n\n', Reset1(5));
 fprintf(fid, '%s\n\n\n', Reset1(6));
 fprintf(fid, '%s\n\n\n', Reset1(7));
 
-fprintf(fid, 'Reset 2 \n');
+fprintf(fid, 'Reset to CM2\n');
 fprintf(fid, '%s\n\n\n', Reset2(1));
 fprintf(fid, '%s\n\n\n', Reset2(2));
 fprintf(fid, '%s\n\n\n', Reset2(3));
@@ -520,7 +565,7 @@ fprintf(fid, '%s\n\n\n', Reset2(5));
 fprintf(fid, '%s\n\n\n', Reset2(6));
 fprintf(fid, '%s\n\n\n', Reset2(7));
 
-fprintf(fid, 'Reset 12 \n');
+fprintf(fid, 'Reset to CM12\n');
 fprintf(fid, '%s\n\n\n', Reset12(1));
 fprintf(fid, '%s\n\n\n', Reset12(2));
 fprintf(fid, '%s\n\n\n', Reset12(3));
@@ -529,9 +574,36 @@ fprintf(fid, '%s\n\n\n', Reset12(5));
 fprintf(fid, '%s\n\n\n', Reset12(6));
 fprintf(fid, '%s\n\n\n', Reset12(7));
 
+fprintf(fid, 'qdd equations CM 1 \n');
+fprintf(fid, '%s\n\n\n', CM1_EOMs(1));
+fprintf(fid, '%s\n\n\n', CM1_EOMs(2));
+fprintf(fid, '%s\n\n\n', CM1_EOMs(3));
+fprintf(fid, '%s\n\n\n', CM1_EOMs(4));
+fprintf(fid, '%s\n\n\n', CM1_EOMs(5));
+fprintf(fid, '%s\n\n\n', CM1_EOMs(6));
+fprintf(fid, '%s\n\n\n', CM1_EOMs(7));
+
+fprintf(fid, 'qdd equations CM 2\n');
+fprintf(fid, '%s\n\n\n', CM2_EOMs(1));
+fprintf(fid, '%s\n\n\n', CM2_EOMs(2));
+fprintf(fid, '%s\n\n\n', CM2_EOMs(3));
+fprintf(fid, '%s\n\n\n', CM2_EOMs(4));
+fprintf(fid, '%s\n\n\n', CM2_EOMs(5));
+fprintf(fid, '%s\n\n\n', CM2_EOMs(6));
+fprintf(fid, '%s\n\n\n', CM2_EOMs(7));
+
+fprintf(fid, 'qdd equations CM 12\n');
+fprintf(fid, '%s\n\n\n', CM12_EOMs(1));
+fprintf(fid, '%s\n\n\n', CM12_EOMs(2));
+fprintf(fid, '%s\n\n\n', CM12_EOMs(3));
+fprintf(fid, '%s\n\n\n', CM12_EOMs(4));
+fprintf(fid, '%s\n\n\n', CM12_EOMs(5));
+fprintf(fid, '%s\n\n\n', CM12_EOMs(6));
+fprintf(fid, '%s\n\n\n', CM12_EOMs(7));
+
 fclose(fid);
 
-disp('Reset maps saved to file.')
+disp('Saving dynamics to file completed.')
 
 %% Equations for Animation
 
@@ -575,58 +647,54 @@ disp('Generating equations for animation completed.')
 
 %% Get Configurations
 
-disp('Solving monkey configurations...')
-
-g = struct();
-
-g.gws = matlabFunction(gws, 'vars', {q.'});
-g.gwe1 = matlabFunction(gwe1, 'vars', {q.'});
-g.gwe2 = matlabFunction(gwe2, 'vars', {q.'});
-g.gwe3 = matlabFunction(gwe3, 'vars', {q.'});
-g.gwe4 = matlabFunction(gwe4, 'vars', {q.'});
-g.gwe5 = matlabFunction(gwe5, 'vars', {q.'});
-
-mAngles = [-pi/8 pi/4 pi/8 -pi/4 0];
-
-a1_h = subs(a1,[q1 q2 q3 q4 p], mAngles);
-a2_h = subs(a2,[q1 q2 q3 q4 p], mAngles);
-
-% a1 only
-% x_config = double(solve(a1_h(1) == 0, x));
-% y_config = double(solve(a1_h(2) == 0, y));
-
-% a2 only
-% x_config = double(solve(a2_h(1) == 0, x));
-% y_config = double(solve(a2_h(2) == 0, y));
-
-% a1 and a2
-x_config = double(solve([a1_h(1) == 0, a2_h(1) == 0], x));
-y_config = double(solve([a1_h(2) == 0, a2_h(2) == 0], y));
-
-
-q_config = [mAngles(1:4) x_config y_config mAngles(5)];
-
-fprintf('[%f, %f, %f, %f, %f, %f, %f]\n',q_config(1), q_config(2), q_config(3), q_config(4), q_config(5), q_config(6), q_config(7))
-
-
-gws_h = g.gws(q_config);
-gwe1_h = g.gwe1(q_config); 
-gwe2_h = g.gwe2(q_config);
-gwe3_h = g.gwe3(q_config); 
-gwe4_h = g.gwe4(q_config);
-gwe5_h = g.gwe5(q_config);
-
-figure
-xlim([-1 1])
-ylim([-1.5 0.5])
-hold on
-plot([gwe5_h(1,3) gws_h(1,3)],[gwe5_h(2,3) gws_h(2,3)],'b-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
-plot([gws_h(1,3) gwe1_h(1,3)],[gws_h(2,3) gwe1_h(2,3)],'k-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
-plot([gws_h(1,3) gwe3_h(1,3)],[gws_h(2,3) gwe3_h(2,3)],'g-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
-plot([gwe1_h(1,3) gwe2_h(1,3)],[gwe1_h(2,3) gwe2_h(2,3)],'m-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
-plot([gwe3_h(1,3) gwe4_h(1,3)],[gwe3_h(2,3) gwe4_h(2,3)],'c-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
-
-disp('Monkey configurations done.')
+% disp('Solving monkey configurations...')
+% 
+% g = struct();
+% 
+% g.gws = matlabFunction(gws, 'vars', {q.'});
+% g.gwe1 = matlabFunction(gwe1, 'vars', {q.'});
+% g.gwe2 = matlabFunction(gwe2, 'vars', {q.'});
+% g.gwe3 = matlabFunction(gwe3, 'vars', {q.'});
+% g.gwe4 = matlabFunction(gwe4, 'vars', {q.'});
+% g.gwe5 = matlabFunction(gwe5, 'vars', {q.'});
+% 
+% guess = [pi/5 0 pi/10 0 0.15 -0.62 0];
+% 
+% a1_h = subs(a1,[x y p], [guess(5:7)]);
+% a2_h = subs(a2,[x y p], [guess(5:7)]);
+% 
+% a1_config = solve([a1_h(2) == 0 a1_h(1) == 0], [q1 q2]);
+% a2_config = solve([a2_h(2) == 0 a2_h(1) == 0.3], [q3 q4]);
+% 
+% q1_config = double(a1_config.q1(1));
+% q2_config = double(a1_config.q2(1));
+% 
+% q3_config = double(a2_config.q3(2));
+% q4_config = double(a2_config.q4(2));
+% 
+% q_config = [q1_config q2_config q3_config q4_config guess(5) guess(6) guess(7)];
+% 
+% fprintf('[%f, %f, %f, %f, %f, %f, %f]\n',q_config(1), q_config(2), q_config(3), q_config(4), q_config(5), q_config(6), q_config(7))
+% 
+% 
+% gws_h = g.gws(q_config);
+% gwe1_h = g.gwe1(q_config); 
+% gwe2_h = g.gwe2(q_config);
+% gwe3_h = g.gwe3(q_config); 
+% gwe4_h = g.gwe4(q_config);
+% gwe5_h = g.gwe5(q_config);
+% 
+% figure
+% xlim([-1 1])
+% ylim([-1.5 0.5])
+% hold on
+% plot([gwe5_h(1,3) gws_h(1,3)],[gwe5_h(2,3) gws_h(2,3)],'b-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+% plot([gws_h(1,3) gwe1_h(1,3)],[gws_h(2,3) gwe1_h(2,3)],'k-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+% plot([gws_h(1,3) gwe3_h(1,3)],[gws_h(2,3) gwe3_h(2,3)],'g-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+% plot([gwe1_h(1,3) gwe2_h(1,3)],[gwe1_h(2,3) gwe2_h(2,3)],'m-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+% plot([gwe3_h(1,3) gwe4_h(1,3)],[gwe3_h(2,3) gwe4_h(2,3)],'c-','LineWidth',3,'Marker','o','MarkerFaceColor','r')
+% 
+% disp('Monkey configurations done.')
 
 %% Done
 
