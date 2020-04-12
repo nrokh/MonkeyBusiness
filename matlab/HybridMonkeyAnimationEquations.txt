@@ -1,38 +1,38 @@
 x
-x - le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) - sin(p)*(lb5 + lb1*cos(q1)) - lb1*cos(p)*sin(q1)
+x - (28333*cos(p)*sin(q1))/100000 - (15901*cos(q1)*sin(p))/100000 - sin(p)*((777*cos(q1))/6250 + 313/10000)
 
 
-x - cos(p)*(lb2*(cos(q1)*sin(q2) + cos(q2)*sin(q1)) + lb1*sin(q1) + le1*sin(q1)) - sin(p)*(lb5 + lb2*(cos(q1)*cos(q2) - sin(q1)*sin(q2)) + lb1*cos(q1) + le1*cos(q1)) - le2*(cos(p)*(cos(q1)*sin(q2) + cos(q2)*sin(q1)) + sin(p)*(cos(q1)*cos(q2) - sin(q1)*sin(q2)))
+x - (8214889979496955*cos(p)*(cos(q1)*sin(q2) + cos(q2)*sin(q1)))/36028797018963968 - (8214889979496955*sin(p)*(cos(q1)*cos(q2) - sin(q1)*sin(q2)))/36028797018963968 - cos(p)*((28333*sin(q1))/100000 + (3614625089724579*cos(q1)*sin(q2))/36028797018963968 + (3614625089724579*cos(q2)*sin(q1))/36028797018963968) - sin(p)*((28333*cos(q1))/100000 + (3614625089724579*cos(q1)*cos(q2))/36028797018963968 - (3614625089724579*sin(q1)*sin(q2))/36028797018963968 + 313/10000)
 
 
-x - le3*(cos(p)*sin(q3) + cos(q3)*sin(p)) - sin(p)*(lb5 + lb3*cos(q3)) - lb3*cos(p)*sin(q3)
+x - (28333*cos(p)*sin(q3))/100000 - (15901*cos(q3)*sin(p))/100000 - sin(p)*((777*cos(q3))/6250 + 313/10000)
 
 
-x - cos(p)*(lb4*(cos(q3)*sin(q4) + cos(q4)*sin(q3)) + lb3*sin(q3) + le3*sin(q3)) - sin(p)*(lb5 + lb4*(cos(q3)*cos(q4) - sin(q3)*sin(q4)) + lb3*cos(q3) + le3*cos(q3)) - le4*(cos(p)*(cos(q3)*sin(q4) + cos(q4)*sin(q3)) + sin(p)*(cos(q3)*cos(q4) - sin(q3)*sin(q4)))
+x - (8214889979496955*cos(p)*(cos(q3)*sin(q4) + cos(q4)*sin(q3)))/36028797018963968 - (8214889979496955*sin(p)*(cos(q3)*cos(q4) - sin(q3)*sin(q4)))/36028797018963968 - cos(p)*((28333*sin(q3))/100000 + (3614625089724579*cos(q3)*sin(q4))/36028797018963968 + (3614625089724579*cos(q4)*sin(q3))/36028797018963968) - sin(p)*((28333*cos(q3))/100000 + (3614625089724579*cos(q3)*cos(q4))/36028797018963968 - (3614625089724579*sin(q3)*sin(q4))/36028797018963968 + 313/10000)
 
 
-x + le5*sin(p)
+x + (121*sin(p))/1250
 
 
-x - lb5*sin(p)
+x - (313*sin(p))/10000
 
 
 y
-y + le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + cos(p)*(lb5 + lb1*cos(q1)) - lb1*sin(p)*sin(q1)
+y + (15901*cos(p)*cos(q1))/100000 - (28333*sin(p)*sin(q1))/100000 + cos(p)*((777*cos(q1))/6250 + 313/10000)
 
 
-y - sin(p)*(lb2*(cos(q1)*sin(q2) + cos(q2)*sin(q1)) + lb1*sin(q1) + le1*sin(q1)) + cos(p)*(lb5 + lb2*(cos(q1)*cos(q2) - sin(q1)*sin(q2)) + lb1*cos(q1) + le1*cos(q1)) + le2*(cos(p)*(cos(q1)*cos(q2) - sin(q1)*sin(q2)) - sin(p)*(cos(q1)*sin(q2) + cos(q2)*sin(q1)))
+y - sin(p)*((28333*sin(q1))/100000 + (3614625089724579*cos(q1)*sin(q2))/36028797018963968 + (3614625089724579*cos(q2)*sin(q1))/36028797018963968) + (8214889979496955*cos(p)*(cos(q1)*cos(q2) - sin(q1)*sin(q2)))/36028797018963968 - (8214889979496955*sin(p)*(cos(q1)*sin(q2) + cos(q2)*sin(q1)))/36028797018963968 + cos(p)*((28333*cos(q1))/100000 + (3614625089724579*cos(q1)*cos(q2))/36028797018963968 - (3614625089724579*sin(q1)*sin(q2))/36028797018963968 + 313/10000)
 
 
-y + le3*(cos(p)*cos(q3) - sin(p)*sin(q3)) + cos(p)*(lb5 + lb3*cos(q3)) - lb3*sin(p)*sin(q3)
+y + (15901*cos(p)*cos(q3))/100000 - (28333*sin(p)*sin(q3))/100000 + cos(p)*((777*cos(q3))/6250 + 313/10000)
 
 
-y - sin(p)*(lb4*(cos(q3)*sin(q4) + cos(q4)*sin(q3)) + lb3*sin(q3) + le3*sin(q3)) + cos(p)*(lb5 + lb4*(cos(q3)*cos(q4) - sin(q3)*sin(q4)) + lb3*cos(q3) + le3*cos(q3)) + le4*(cos(p)*(cos(q3)*cos(q4) - sin(q3)*sin(q4)) - sin(p)*(cos(q3)*sin(q4) + cos(q4)*sin(q3)))
+y - sin(p)*((28333*sin(q3))/100000 + (3614625089724579*cos(q3)*sin(q4))/36028797018963968 + (3614625089724579*cos(q4)*sin(q3))/36028797018963968) + (8214889979496955*cos(p)*(cos(q3)*cos(q4) - sin(q3)*sin(q4)))/36028797018963968 - (8214889979496955*sin(p)*(cos(q3)*sin(q4) + cos(q4)*sin(q3)))/36028797018963968 + cos(p)*((28333*cos(q3))/100000 + (3614625089724579*cos(q3)*cos(q4))/36028797018963968 - (3614625089724579*sin(q3)*sin(q4))/36028797018963968 + 313/10000)
 
 
-y - le5*cos(p)
+y - (121*cos(p))/1250
 
 
-y + lb5*cos(p)
+y + (313*cos(p))/10000
 
 
