@@ -16,7 +16,7 @@ adj = @(g) [[g(1,1) g(1,2);g(2,1) g(2,2)] [g(2,3);-g(1,3)]; zeros(1,2) 1];
 % 2 arm monkey robot
 
 syms q1 q2 q3 q4 x y p dq1 dq2 dq3 dq4 dx dy dp ddq1 ddq2 ddq3 ddq4 ddx ddy ddp real
-syms m1 m2 m3 m4 m5 I1 I2 I3 I4 I5 lb1 le1 lb2 le2 lb3 le3 lb4 le4 lb5 le5 real
+% syms m1 m2 m3 m4 m5 I1 I2 I3 I4 I5 lb1 le1 lb2 le2 lb3 le3 lb4 le4 lb5 le5 real
 
 q = [q1; q2; q3; q4; x; y; p];
 dq = [dq1; dq2; dq3; dq4; dx; dy; dp];
@@ -24,53 +24,53 @@ ddq = [ddq1; ddq2; ddq3; ddq4; ddx; ddy; ddp];
 
 g = 9.81;
 
-% BodyMass = 0.98871;
-% ForeArmMass = 0.671;
-% HumerousArmMass = 0.7739;
-% 
-% BodyInertia = 2083824.597/1000/1000/1000;
-% ForeArmInertia = 0.004;
-% HumerousArmInertia = 0.00034;
-% 
-% BodyTopLength = 0.03130;
-% BodyBotLength = 0.1281 - BodyTopLength;
-% 
-% ForeArmBotLength = 0.067;
-% ForeArmTopLength = 0.171008;
-% 
-% HumerousArmBotLength = 0.12432;
-% HumerousArmTopLenght = 0.15901;
-% 
-% m1 = HumerousArmMass;
-% m3 = m1;
-% 
-% m2 = ForeArmMass;
-% m4 = m2;
-% 
-% m5 = BodyMass;
-% 
-% I1 = HumerousArmInertia;
-% I3 = I1;
-% 
-% I2 = ForeArmInertia;
-% I4 = I2;
-% 
-% I5 = BodyInertia;
-% 
-% lb5 = BodyTopLength;
-% le5 = BodyBotLength;
-% 
-% lb1 = HumerousArmBotLength;
-% le1 = HumerousArmTopLenght;
-% 
-% lb3 = lb1;
-% le3 = le1;
-% 
-% lb2 = ForeArmBotLength;
-% le2 = ForeArmTopLength;
-% 
-% lb4 = lb2;
-% le4 = le2;
+BodyMass = 0.98871;
+ForeArmMass = 0.671;
+HumerousArmMass = 0.7739;
+
+BodyInertia = 2083824.597/1000/1000/1000;
+ForeArmInertia = 0.004;
+HumerousArmInertia = 0.00034;
+
+BodyTopLength = 0.03130;
+BodyBotLength = 0.1281 - BodyTopLength;
+
+ForeArmBotLength = 0.067;
+ForeArmTopLength = 0.171008;
+
+HumerousArmBotLength = 0.12432;
+HumerousArmTopLenght = 0.15901;
+
+m1 = HumerousArmMass;
+m3 = m1;
+
+m2 = ForeArmMass;
+m4 = m2;
+
+m5 = BodyMass;
+
+I1 = HumerousArmInertia;
+I3 = I1;
+
+I2 = ForeArmInertia;
+I4 = I2;
+
+I5 = BodyInertia;
+
+lb5 = BodyTopLength;
+le5 = BodyBotLength;
+
+lb1 = HumerousArmBotLength;
+le1 = HumerousArmTopLenght;
+
+lb3 = lb1;
+le3 = le1;
+
+lb2 = ForeArmBotLength;
+le2 = ForeArmTopLength;
+
+lb4 = lb2;
+le4 = le2;
 
 %% Shou Model
 % m1 = 0.38;
@@ -448,48 +448,48 @@ Acl_constraint2Y = AConstraint2(2);
 
 disp('Contact constraints finished.')
 
-%% disp('Calculating EOM for CM 1...')
-% 
-% A = A1;
-% Ad = A1d;
-% [~, Mdag1, Adag1, LAM1] = BlockInverse(M,A);
-% Mdag1 = simplify(Mdag1);
-% Adag1 = simplify(Adag1);
-% LAM1 = simplify(LAM1);
-% ddq1 = simplify(Mdag1*(Y - C*dq - N) - (Adag1.'*Ad*dq));
-% lam_out1 = simplify(Adag1*(Y - C*dq - N) - (LAM1*Ad*dq));
-% 
-% disp('Calculating EOM for CM 1 Done.')
-% 
-% %%
-% 
-% disp('Calculating EOM for CM 2...')
-% 
-% A = A2;
-% Ad = A2d;
-% [~, Mdag2, Adag2, LAM2] = BlockInverse(M,A);
-% Mdag2 = simplify(Mdag2);
-% Adag2 = simplify(Adag2);
-% LAM2 = simplify(LAM2);
-% ddq2 = simplify(Mdag2*(Y - C*dq - N) - (Adag2.'*Ad*dq));
-% lam_out2 = simplify(Adag2*(Y - C*dq - N) - (LAM2*Ad*dq));
-% 
-% disp('Calculating EOM for CM 2 Done.')
-% 
-% %%
-% 
-% disp('Calculating EOM for CM 12...')
-% 
-% A = [A1; A2];
-% Ad = [A1d; A2d];
-% [~, Mdag12, Adag12, LAM12] = BlockInverse(M,A);
-% Mdag12 = simplify(Mdag12);
-% Adag12 = simplify(Adag12);
-% LAM12 = simplify(LAM12);
-% ddq12 = simplify(Mdag12*(Y - C*dq - N) - (Adag12.'*Ad*dq));
-% lam_out12 = simplify(Adag12*(Y - C*dq - N) - (LAM12*Ad*dq));
-% 
-% disp('Calculating EOM for CM 12 Done.')
+% disp('Calculating EOM for CM 1...')
+
+A = A1;
+Ad = A1d;
+[~, Mdag1, Adag1, LAM1] = BlockInverse(M,A);
+Mdag1 = simplify(Mdag1);
+Adag1 = simplify(Adag1);
+LAM1 = simplify(LAM1);
+ddq1 = simplify(Mdag1*(Y - C*dq - N) - (Adag1.'*Ad*dq));
+lam_out1 = simplify(Adag1*(Y - C*dq - N) - (LAM1*Ad*dq));
+
+disp('Calculating EOM for CM 1 Done.')
+
+%%
+
+disp('Calculating EOM for CM 2...')
+
+A = A2;
+Ad = A2d;
+[~, Mdag2, Adag2, LAM2] = BlockInverse(M,A);
+Mdag2 = simplify(Mdag2);
+Adag2 = simplify(Adag2);
+LAM2 = simplify(LAM2);
+ddq2 = simplify(Mdag2*(Y - C*dq - N) - (Adag2.'*Ad*dq));
+lam_out2 = simplify(Adag2*(Y - C*dq - N) - (LAM2*Ad*dq));
+
+disp('Calculating EOM for CM 2 Done.')
+
+%%
+
+disp('Calculating EOM for CM 12...')
+
+A = [A1; A2];
+Ad = [A1d; A2d];
+[~, Mdag12, Adag12, LAM12] = BlockInverse(M,A);
+Mdag12 = simplify(Mdag12);
+Adag12 = simplify(Adag12);
+LAM12 = simplify(LAM12);
+ddq12 = simplify(Mdag12*(Y - C*dq - N) - (Adag12.'*Ad*dq));
+lam_out12 = simplify(Adag12*(Y - C*dq - N) - (LAM12*Ad*dq));
+
+disp('Calculating EOM for CM 12 Done.')
 
 %% Reset Maps
 
