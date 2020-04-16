@@ -1,38 +1,37 @@
 x
-x - le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) - sin(p)*(lb5 + lb1*cos(q1)) - lb1*cos(p)*sin(q1)
+x - (7573*cos(p)*sin(q1))/50000 - (769*cos(q1)*sin(p))/10000 - sin(p)*((233*cos(q1))/3125 + 313/10000)
 
 
-x - cos(p)*(lb2*(cos(q1)*sin(q2) + cos(q2)*sin(q1)) + lb1*sin(q1) + le1*sin(q1)) - sin(p)*(lb5 + lb2*(cos(q1)*cos(q2) - sin(q1)*sin(q2)) + lb1*cos(q1) + le1*cos(q1)) - le2*(cos(p)*(cos(q1)*sin(q2) + cos(q2)*sin(q1)) + sin(p)*(cos(q1)*cos(q2) - sin(q1)*sin(q2)))
+x - cos(p)*((7573*sin(q1))/50000 + (67*cos(q1)*sin(q2))/1000 + (67*cos(q2)*sin(q1))/1000) - sin(p)*((7573*cos(q1))/50000 + (67*cos(q1)*cos(q2))/1000 - (67*sin(q1)*sin(q2))/1000 + 313/10000) - (2672*cos(p)*(cos(q1)*sin(q2) + cos(q2)*sin(q1)))/15625 - (2672*sin(p)*(cos(q1)*cos(q2) - sin(q1)*sin(q2)))/15625
 
 
-x - le3*(cos(p)*sin(q3) + cos(q3)*sin(p)) - sin(p)*(lb5 + lb3*cos(q3)) - lb3*cos(p)*sin(q3)
+x - (7573*cos(p)*sin(q3))/50000 - (769*cos(q3)*sin(p))/10000 - sin(p)*((233*cos(q3))/3125 + 313/10000)
 
 
-x - cos(p)*(lb4*(cos(q3)*sin(q4) + cos(q4)*sin(q3)) + lb3*sin(q3) + le3*sin(q3)) - sin(p)*(lb5 + lb4*(cos(q3)*cos(q4) - sin(q3)*sin(q4)) + lb3*cos(q3) + le3*cos(q3)) - le4*(cos(p)*(cos(q3)*sin(q4) + cos(q4)*sin(q3)) + sin(p)*(cos(q3)*cos(q4) - sin(q3)*sin(q4)))
+x - cos(p)*((7573*sin(q3))/50000 + (67*cos(q3)*sin(q4))/1000 + (67*cos(q4)*sin(q3))/1000) - sin(p)*((7573*cos(q3))/50000 + (67*cos(q3)*cos(q4))/1000 - (67*sin(q3)*sin(q4))/1000 + 313/10000) - (2672*cos(p)*(cos(q3)*sin(q4) + cos(q4)*sin(q3)))/15625 - (2672*sin(p)*(cos(q3)*cos(q4) - sin(q3)*sin(q4)))/15625
 
 
-x + le5*sin(p)
+x + (121*sin(p))/1250
 
 
-x - lb5*sin(p)
+x - (313*sin(p))/10000
 
 
 y
-y + le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + cos(p)*(lb5 + lb1*cos(q1)) - lb1*sin(p)*sin(q1)
+y + (769*cos(p)*cos(q1))/10000 - (7573*sin(p)*sin(q1))/50000 + cos(p)*((233*cos(q1))/3125 + 313/10000)
 
 
-y - sin(p)*(lb2*(cos(q1)*sin(q2) + cos(q2)*sin(q1)) + lb1*sin(q1) + le1*sin(q1)) + cos(p)*(lb5 + lb2*(cos(q1)*cos(q2) - sin(q1)*sin(q2)) + lb1*cos(q1) + le1*cos(q1)) + le2*(cos(p)*(cos(q1)*cos(q2) - sin(q1)*sin(q2)) - sin(p)*(cos(q1)*sin(q2) + cos(q2)*sin(q1)))
+y - sin(p)*((7573*sin(q1))/50000 + (67*cos(q1)*sin(q2))/1000 + (67*cos(q2)*sin(q1))/1000) + (2672*cos(p)*(cos(q1)*cos(q2) - sin(q1)*sin(q2)))/15625 - (2672*sin(p)*(cos(q1)*sin(q2) + cos(q2)*sin(q1)))/15625 + cos(p)*((7573*cos(q1))/50000 + (67*cos(q1)*cos(q2))/1000 - (67*sin(q1)*sin(q2))/1000 + 313/10000)
 
 
-y + le3*(cos(p)*cos(q3) - sin(p)*sin(q3)) + cos(p)*(lb5 + lb3*cos(q3)) - lb3*sin(p)*sin(q3)
+y + (769*cos(p)*cos(q3))/10000 - (7573*sin(p)*sin(q3))/50000 + cos(p)*((233*cos(q3))/3125 + 313/10000)
 
 
-y - sin(p)*(lb4*(cos(q3)*sin(q4) + cos(q4)*sin(q3)) + lb3*sin(q3) + le3*sin(q3)) + cos(p)*(lb5 + lb4*(cos(q3)*cos(q4) - sin(q3)*sin(q4)) + lb3*cos(q3) + le3*cos(q3)) + le4*(cos(p)*(cos(q3)*cos(q4) - sin(q3)*sin(q4)) - sin(p)*(cos(q3)*sin(q4) + cos(q4)*sin(q3)))
+y - sin(p)*((7573*sin(q3))/50000 + (67*cos(q3)*sin(q4))/1000 + (67*cos(q4)*sin(q3))/1000) + (2672*cos(p)*(cos(q3)*cos(q4) - sin(q3)*sin(q4)))/15625 - (2672*sin(p)*(cos(q3)*sin(q4) + cos(q4)*sin(q3)))/15625 + cos(p)*((7573*cos(q3))/50000 + (67*cos(q3)*cos(q4))/1000 - (67*sin(q3)*sin(q4))/1000 + 313/10000)
 
 
-y - le5*cos(p)
+y - (121*cos(p))/1250
 
 
-y + lb5*cos(p)
-
+y + (313*cos(p))/10000
 
