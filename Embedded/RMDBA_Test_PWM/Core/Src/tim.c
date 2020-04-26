@@ -22,8 +22,8 @@
 
 /* USER CODE BEGIN 0 */
 // Set gripper PWM calibration values {open, close}
-Gripper_PWM_Cal Gripper_1_PWM_Cal = {3310, 4590};
-Gripper_PWM_Cal Gripper_2_PWM_Cal = {5700, 4430};
+Gripper Gripper_1 = {3310, 4590};
+Gripper Gripper_2 = {5700, 4430};
 
 /**
   * @brief  Opens the specified gripper.
@@ -32,9 +32,9 @@ Gripper_PWM_Cal Gripper_2_PWM_Cal = {5700, 4430};
   */
 void open_gripper(TIM_HandleTypeDef* htim, Gripper_Num n) {
 	if(n == Gripper_1)
-		htim->Instance->CCR3 = Gripper_1_PWM_Cal.open;
+		htim->Instance->CCR3 = Gripper_1.open;
 	else if(n == Gripper_2)
-		htim->Instance->CCR4 = Gripper_2_PWM_Cal.open;
+		htim->Instance->CCR4 = Gripper_2.open;
 	return;
 }
 
@@ -45,9 +45,9 @@ void open_gripper(TIM_HandleTypeDef* htim, Gripper_Num n) {
   */
 void close_gripper(TIM_HandleTypeDef* htim, Gripper_Num n) {
 	if(n == Gripper_1)
-		htim->Instance->CCR3 = Gripper_1_PWM_Cal.close;
+		htim->Instance->CCR3 = Gripper_1.close;
 	else if(n == Gripper_2)
-		htim->Instance->CCR4 = Gripper_2_PWM_Cal.close;
+		htim->Instance->CCR4 = Gripper_2.close;
 	return;
 }
 /* USER CODE END 0 */
