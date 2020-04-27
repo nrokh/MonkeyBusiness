@@ -13,7 +13,7 @@
 
 // Typedefs
 // Default data type of the trajectory file
-typedef char traj_t;
+typedef float traj_t;
 
 // Structure definitions
 /**
@@ -45,7 +45,7 @@ void reset_traj(Trajectory*);
 /**
   * @brief	Update trajectory object to the next time-step of data
   */
-void update_traj(Trajectory*);
+uint8_t update_traj(Trajectory*);
 
 /**
   * @brief	Returns whether or not there is any unread data in the trajectory

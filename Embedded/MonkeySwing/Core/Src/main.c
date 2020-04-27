@@ -42,12 +42,14 @@ typedef enum {Init, Wait, Toggle, Cal, Load, Swing} State;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TRAJ_FILE_BYTES 894	// Trajectory file size, in units of bytes (MUST be the exact file size)
+#define TRAJ_FILE_STEPS 9	// Number of time steps in the trajectory
+//#define TRAJ_FILE_BYTES 432	// Trajectory file size, in units of bytes (MUST be the exact file size)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define TRAJ_FILE_SIZE TRAJ_FILE_BYTES / sizeof(traj_t)
+#define TRAJ_FILE_BYTES (12 * 4 * TRAJ_FILE_STEPS)
+#define TRAJ_FILE_SIZE (TRAJ_FILE_BYTES / sizeof(traj_t))
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -111,7 +113,7 @@ void update_motor_cntl() {
 //		set_voltage(&motors[i], (int16_t) (motor_cntlrs[i].u+traj.torque[i]));
 //	}
 //	send_voltage(&hcan1, motors);
-//	update_traj(&traj);
+	update_traj(&traj);
 
 	for(uint8_t i = 0; i < 4; ++i) {
 		pid_update(&motor_cntlrs[i], ref[i], motors[i].vel);
@@ -326,6 +328,7 @@ int main(void)
 	  		  file_tx_done = 0;
 	  		  HAL_UART_Receive_DMA(&huart2, &traj_arr[0], TRAJ_FILE_BYTES);	// Set up UART for file transfer
 	  		  while(!file_tx_done);	// wait for transfer to finish
+	  		  reset_traj(&traj);	// Load in first set of data
 	  		  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);
 	  		  state = Wait;	// return to wait state
 	  		  break;
