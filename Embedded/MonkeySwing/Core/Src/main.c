@@ -37,18 +37,18 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef enum {Init, Wait, Toggle, Cal, Load, Swing} State;
+typedef enum {Init, Wait, Toggle, Power, Cal, Load, Swing} State;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TRAJ_FILE_STEPS 9	// Number of time steps in the trajectory
-//#define TRAJ_FILE_BYTES 432	// Trajectory file size, in units of bytes (MUST be the exact file size)
+//#define TRAJ_FILE_STEPS 9	// Number of time steps in the trajectory
+#define TRAJ_FILE_BYTES 58968	// Trajectory file size, in units of bytes (MUST be the exact file size)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define TRAJ_FILE_BYTES (12 * 4 * TRAJ_FILE_STEPS)
+//#define TRAJ_FILE_BYTES (13 * 4 * TRAJ_FILE_STEPS)
 #define TRAJ_FILE_SIZE (TRAJ_FILE_BYTES / sizeof(traj_t))
 /* USER CODE END PM */
 
@@ -59,9 +59,11 @@ PID_Controller pos_cntlrs[4];	// position PID controller
 PID_Controller vel_cntlrs[4];	// velocity PID controller
 PID_Controller motor_cntlrs[4];	// motor PID controller (technically voltage, whatever that means)
 int16_t ref[] = {0, 0, 0, 0};	// motor reference (for debugging)
-uint16_t angle_zeros[4];		// free-hanging motor angle readings, for calibration
 
-Motor motors[4];					// motors
+Motor motors[4];						// motors
+int8_t motor_dirs[4] = {-1, 1, 1, -1};	// motor directions
+uint8_t motors_on = 0;					// indicates if motors are on (1) or off (2)
+
 Trajectory traj;					// trajectory iterator
 uint8_t traj_arr[TRAJ_FILE_BYTES];	// raw trajectory file location
 uint8_t file_tx_done = 1;			// indicator for if trajectory file is actively being loaded or not (referenced by DMA callback)
@@ -80,6 +82,7 @@ unsigned char msg_done[] = "done\r\n\r\n";
 unsigned char msg_init[] = "Initialization done\r\n\r\n";
 unsigned char msg_wait[] = "Waiting for command\r\n";
 unsigned char msg_toggle[] = "Toggling gripper... ";
+unsigned char msg_power[] = "Toggling motor power... ";
 unsigned char msg_cal[] = "Reading motor positions... ";
 unsigned char msg_load[] = "Waiting for trajectory file... ";
 unsigned char msg_swing[] = "Starting swing... ";
@@ -97,10 +100,19 @@ Gripper* get_release_hand(void);
   * @brief	PID controller update
   */
 void update_motor_cntl() {
-	// TODO: Implement cascade architecture
+	if(traj_is_finished(&traj) == 1) {
+		finish_traj();
+	}
+
+	if(traj.cmode == 12.0) {
+		close_gripper(&Gripper_2_Cal);
+	} else {
+		open_gripper(&Gripper_2_Cal);
+	}
+
 //	// Position controller update
 //	for(uint8_t i = 0; i < 4; ++i) {
-//		pid_update(&pos_cntlrs[i], traj.pos[i], motors[i].pos-angle_zeros[i]);
+//		pid_update(&pos_cntlrs[i], traj.pos[i], motors[i].pos-motors[i].off);
 //	}
 //	// Velocity controller update
 //	for(uint8_t i = 0; i < 4; ++i) {
@@ -112,14 +124,18 @@ void update_motor_cntl() {
 //		pid_update(&motor_cntlrs[i], vel_cntlrs[i].u, motors[i].cur);
 //		set_voltage(&motors[i], (int16_t) (motor_cntlrs[i].u+traj.torque[i]));
 //	}
-//	send_voltage(&hcan1, motors);
+	pid_update(&pos_cntlrs[0], traj.pos[0], motors[0].pos-motors[0].off);
+	pid_update(&motor_cntlrs[0], pos_cntlrs[0].u, motors[0].vel);
+	set_voltage(&motors[0], (int16_t) (motor_cntlrs[0].u));
+
+	send_voltage(&hcan1, motors);
 	update_traj(&traj);
 
-	for(uint8_t i = 0; i < 4; ++i) {
-		pid_update(&motor_cntlrs[i], ref[i], motors[i].vel);
-		set_voltage(&motors[i], (int16_t) motor_cntlrs[i].u);
-	}
-	send_voltage(&hcan1, motors);
+//	for(uint8_t i = 0; i < 4; ++i) {
+//		pid_update(&motor_cntlrs[i], ref[i], motors[i].vel);
+//		set_voltage(&motors[i], (int16_t) motor_cntlrs[i].u);
+//	}
+//	send_voltage(&hcan1, motors);
 	return;
 }
 
@@ -127,11 +143,11 @@ void update_motor_cntl() {
   * @brief	Finish trajectory response
   */
 void finish_traj() {
-	close_gripper(release_hand);	// close swinging gripper
+//	close_gripper(release_hand);	// close swinging gripper
 
 	// Disable timer interrupts
 	HAL_TIM_Base_Stop_IT(&htim9);
-	HAL_TIM_Base_Stop_IT(&htim13);
+//	HAL_TIM_Base_Stop_IT(&htim13);
 
 	reset_traj(&traj);	// reset trajectory iterator
 
@@ -150,6 +166,7 @@ void finish_traj() {
   */
 void traj_load_done() {
 	file_tx_done = 1;
+	HAL_Delay(1000);
 	return;
 }
 
@@ -228,15 +245,15 @@ int main(void)
 
   // Initialize PID controllers for position (outer-most loop of cascade architecture)
   for(uint8_t i = 0; i < 2; ++i)
-  	  pid_init(&pos_cntlrs[i], 0, 0, 0, 0.001, 0, 0, 1);
+  	  pid_init(&pos_cntlrs[i], 100, 10.0, 0.1, 0.005, 0, 0, 1);
   for(uint8_t i = 2; i < 4; ++i)
-  	  pid_init(&pos_cntlrs[i], 0, 0, 0, 0.001, 0, 0, 1);
+  	  pid_init(&pos_cntlrs[i], 100, 10.0, 0.1, 0.005, 0, 0, 1);
 
   // Initialize PID controllers for velocity (middle loop of cascade architecture)
   for(uint8_t i = 0; i < 2; ++i)
-   	  pid_init(&vel_cntlrs[i], 0, 0, 0, 0.001, 0, 0, 1);
+   	  pid_init(&vel_cntlrs[i], 100.0, 10.0, 0.1, 0.005, 0, 0, 1);
   for(uint8_t i = 2; i < 4; ++i)
-   	  pid_init(&vel_cntlrs[i], 0, 0, 0, 0.001, 0, 0, 1);
+   	  pid_init(&vel_cntlrs[i], 100.0, 10.0, 0.1, 0.005, 0, 0, 1);
 
   // Initialize PID controllers for motors (inner-most loop of cascade architecture)
   for(uint8_t i = 0; i < 4; ++i)
@@ -247,17 +264,10 @@ int main(void)
 
   // Initialize motors
   for(uint8_t i = 0; i < 4; ++i)
-	  motor_init(&motors[i], i+1);
+	  motor_init(&motors[i], i+1, motor_dirs[i]);
 
   // Finish CAN initialization for robot motors.
   can_motors_init(&hcan1);
-
-  // Turn motors on
-  power_on_motors();
-  HAL_Delay(500);	// Give motors some time to turn on, otherwise will jerk on startup
-  for(uint8_t i = 0; i < 4; ++i)
-	  set_voltage(&motors[i], 0);
-  send_voltage(&hcan1, motors);
 
   // Enable CAN
   HAL_CAN_Start(&hcan1);
@@ -282,11 +292,13 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  switch(state) {
+	  	  // Initialization state - only ever entered once
 	  	  case Init:
 	  		  HAL_UART_Transmit(&huart2, msg_init, sizeof(msg_init), 1000);
 	  		  state = Wait;
 	  		  break;
 
+	  	  // Wait state - wait to receive a command over UART
 	  	  case Wait:
 	  		  HAL_UART_Transmit(&huart2, msg_wait, sizeof(msg_wait), 1000);
 	  		  while(HAL_UART_Receive(&huart2, &cmd, 1, 100) != HAL_OK);
@@ -295,12 +307,15 @@ int main(void)
 	  			  state = Toggle;
 	  		  else if(cmd == 'c' || cmd == 'C')
 	  			  state = Cal;
+	  		  else if(cmd == 'p' || cmd == 'P')
+	  			  state = Power;
 	  		  else if(cmd == 't' || cmd == 'T')
 	  			  state = Load;
 	  		  else if(cmd == 's' || cmd == 'S')
 	  			  state = Swing;
 	  		  break;
 
+	  	  // Toggle state - open/close the specified gripper
 	  	  case Toggle:
 	  		  HAL_UART_Transmit(&huart2, msg_toggle, sizeof(msg_toggle), 1000);
 	  		  // Open or close gripper 1
@@ -313,16 +328,38 @@ int main(void)
 	  		  state = Wait;	// return to wait state
 	  		  break;
 
+	  	  // Motor power state - turn the GM6020 motor power on/off
+	  	  case Power:
+	  		  HAL_UART_Transmit(&huart2, msg_power, sizeof(msg_power), 1000);
+	  		  if(motors_on) {
+	  			  // Turn motors off
+	  			  power_off_motors();
+	  		  	  motors_on = 0;
+	  		  } else {
+	  			  // Turn motors on
+	  			  power_on_motors();
+	  			  HAL_Delay(500);	// Give motors some time to turn on, otherwise will jerk on startup
+	  			  for(uint8_t i = 0; i < 4; ++i)
+	  				  set_voltage(&motors[i], 0);
+	  			  send_voltage(&hcan1, motors);
+	  			  motors_on = 1;
+	  		  }
+	  		  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);
+	  		  state = Wait;	// return to wait state
+	  		  break;
+
+	  	  // Calibration state - set the zeros for the motor positions
 	  	  case Cal:
 	  		  HAL_UART_Transmit(&huart2, msg_cal, sizeof(msg_cal), 1000);
 	  		  HAL_Delay(100);	// Give motors time to send sensor feedback
 	  		  // Save the zero angle readings
 	  		  for(uint8_t i = 0; i < 4; ++i)
-	  			  angle_zeros[i] = motors[i].pos;
+	  			  motors[i].off = (float) motors[i].pos * TICK_TO_RAD;
 	  		  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);
 	  		  state = Wait;	// return to wait state
 	  		  break;
 
+	  	  // Load trajectory state - wait until the trajectory file of the exact specified size is received over UART
 	  	  case Load:	// NOTE: Cannot receive a new command until the entire file is received
 	  		  HAL_UART_Transmit(&huart2, msg_load, sizeof(msg_load), 1000);
 	  		  file_tx_done = 0;
@@ -333,13 +370,14 @@ int main(void)
 	  		  state = Wait;	// return to wait state
 	  		  break;
 
+	  	  // Swing state - Use PID to follow trajectory file
 	  	  case Swing:
-	  		  release_hand = get_release_hand();	// determine gripper to be released
+//	  		  release_hand = get_release_hand();	// determine gripper to be released
 	  		  HAL_UART_Transmit(&huart2, msg_swing, sizeof(msg_swing), 1000);
 	  		  swing_done = 0;
-	  		  open_gripper(release_hand);			// release gripper, start swing
+//	  		  open_gripper(release_hand);			// release gripper, start swing
 	  		  HAL_TIM_Base_Start_IT(&htim9);		// enable timer interrupts for PID update
-	  		  HAL_TIM_Base_Start_IT(&htim13);		// enable timer interrupts for gripper close
+//	  		  HAL_TIM_Base_Start_IT(&htim13);		// enable timer interrupts for gripper close
 	  		  while(!swing_done);
 	  		  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);
 	  		  state = Wait;	// return to wait state

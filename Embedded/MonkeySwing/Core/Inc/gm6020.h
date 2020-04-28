@@ -14,6 +14,8 @@
 #define CAN_ID_RCV_BASE 0x204
 #define VOLT_MAX 30000
 #define VOLT_MIN -30000
+#define TICK_TO_RAD 7.6708403213033652507e-4;
+#define RPM_TO_RADpS 1.047197551196597746e-1;
 
 // Structure definitions
 /**
@@ -21,16 +23,20 @@
   */
 typedef struct Motor {
 	// Motor identification
-	uint8_t id;			// Motor ID, as set on DIP switches (1 - 7)
-	uint16_t can_addr;	// Motor CAN address for reception
+	uint8_t id;			// motor ID, as set on DIP switches (1 - 7)
+	uint16_t can_addr;	// motor CAN address for reception
 
 	// Output signal
-	int16_t volt;	// Voltage control signal
+	int16_t volt;	// voltage control signal
 
 	// Feedback signals
-	uint16_t pos;	// Angular position feedback
-	int16_t vel;	// Angular velocity feedback
-	int16_t cur;	// Torque current feedback
+	float pos;	// angular position feedback
+	float vel;	// angular velocity feedback
+	int16_t cur;	// torque current feedback
+
+	// Direction parameters
+	int8_t dir;		// direction scaling
+	float off;	// angle position offset
 } Motor;
 
 // Function prototypes
@@ -42,7 +48,7 @@ void can_motors_init(CAN_HandleTypeDef*);
 /**
   * @brief	Motor initialization
   */
-void motor_init(Motor* m, uint8_t id);
+void motor_init(Motor* m, uint8_t id, uint8_t dir);
 
 /**
   * @brief	Set the motor voltage

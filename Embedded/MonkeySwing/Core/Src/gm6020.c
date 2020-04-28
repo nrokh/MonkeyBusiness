@@ -33,7 +33,7 @@ void can_motors_init(CAN_HandleTypeDef* hcan) {
   * @param	motor Motor structure handle
   * @param	id Motor ID set on DIP switches (1 - 7)
   */
-void motor_init(Motor* m, uint8_t id) {
+void motor_init(Motor* m, uint8_t id, uint8_t dir) {
 	m->id = id;
 	m->can_addr = CAN_ID_RCV_BASE + id;
 
@@ -42,6 +42,9 @@ void motor_init(Motor* m, uint8_t id) {
 	m->pos = 0;
 	m->vel = 0;
 	m->cur = 0;
+
+	m->dir = dir;
+	m->off = 0;
 
 	return;
 }
@@ -109,9 +112,15 @@ void update_meas(CAN_HandleTypeDef* hcan) {
 
 	// Update motor feedback values
 	ind = hrx.StdId - CAN_ID_RCV_BASE - 1;
-	motors[ind].pos = (uint16_t) (((uint16_t) data[0]) << 8 | data[1]);
-	motors[ind].vel = (int16_t) (((uint16_t) data[2]) << 8 | data[3]);
-	motors[ind].cur = (int16_t) (((uint16_t) data[4]) << 8 | data[5]);
+	if(motors[ind].dir == 1) {
+		motors[ind].pos = (float) (((uint16_t) data[0]) << 8 | data[1]) * TICK_TO_RAD;
+		motors[ind].vel = (float) (((uint16_t) data[2]) << 8 | data[3]) * RPM_TO_RADpS;
+		motors[ind].cur = (int16_t) (((uint16_t) data[4]) << 8 | data[5]);
+	} else {
+		motors[ind].pos = (float) (8191 - (((uint16_t) data[0]) << 8 | data[1])) * TICK_TO_RAD;
+		motors[ind].vel = (float) -(((uint16_t) data[2]) << 8 | data[3]) * RPM_TO_RADpS;
+		motors[ind].cur = (int16_t) -(((uint16_t) data[4]) << 8 | data[5]);
+	}
 
 	return;
 }

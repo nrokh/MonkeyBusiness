@@ -111,7 +111,7 @@ void MX_TIM9_Init(void)
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
 
   htim9.Instance = TIM9;
-  htim9.Init.Prescaler = 2;
+  htim9.Init.Prescaler = 6;
   htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim9.Init.Period = 56000;
   htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
