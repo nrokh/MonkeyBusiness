@@ -38,7 +38,7 @@ typedef enum {Gripper_1, Gripper_2} Gripper_Num;
 typedef struct {
 	uint16_t open;
 	uint16_t close;
-} Gripper_PWM_Cal;
+} Gripper;
 /* USER CODE END Private defines */
 
 void MX_TIM2_Init(void);
