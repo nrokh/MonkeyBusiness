@@ -10,12 +10,12 @@ states = [q; dq];
 disp("Calculating A Matrix")
 A_ss = jacobian(eqns, states);
 disp("Simplifying A")
-A_ss = simplify(A_ss);
+% A_ss = simplify(A_ss);
 disp("Done with A");
 
 inputs = [u1; u2; u3; u4];
 disp("Calculating B Matrix")
 B_ss = jacobian(eqns, inputs);
 disp("Simplifying B")
-A_ss = simplify(B_ss);
+% B_ss = simplify(B_ss);
 disp("Done with B");

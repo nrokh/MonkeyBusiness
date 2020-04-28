@@ -4,12 +4,12 @@
 % matlabFunction(ddq1, 'File', 'simulinkDynamics1');
 % matlabFunction(ddq2, 'File', 'simulinkDynamics2');
 % matlabFunction(ddq12, 'File', 'simulinkDynamics12');
-matlabFunction(A1, 'File', 'simulinkA1');
-matlabFunction(A2, 'File', 'simulinkA2');
-matlabFunction(A12, 'File', 'simulinkA12');
-matlabFunction(Adag1, 'File', 'simulinkAdag1');
-matlabFunction(Adag2, 'File', 'simulinkAdag2');
-matlabFunction(Adag12, 'File', 'simulinkAdag12');
+% matlabFunction(A1, 'File', 'simulinkA1');
+% matlabFunction(A2, 'File', 'simulinkA2');
+% matlabFunction(A12, 'File', 'simulinkA12');
+% matlabFunction(Adag1, 'File', 'simulinkAdag1');
+% matlabFunction(Adag2, 'File', 'simulinkAdag2');
+% matlabFunction(Adag12, 'File', 'simulinkAdag12');
 
 %Read trajectory and process data
 T = readmatrix('MonkeySwing.csv');
