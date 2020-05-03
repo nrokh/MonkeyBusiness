@@ -33,6 +33,7 @@ typedef struct Motor {
 	int16_t volt;	// voltage control signal
 
 	// Feedback signals
+	uint16_t raw_pos;
 	int16_t pos;	// angular position feedback
 	int8_t num_turns;
 	int16_t vel;	// angular velocity feedback

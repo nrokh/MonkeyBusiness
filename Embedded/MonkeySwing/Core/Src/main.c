@@ -68,6 +68,7 @@ Trajectory traj;					// trajectory iterator
 uint8_t traj_arr[TRAJ_FILE_BYTES];	// raw trajectory file location
 uint8_t file_tx_done = 1;			// indicator for if trajectory file is actively being loaded or not (referenced by DMA callback)
 uint8_t swing_done = 1;				// indicator for if swing motion is completed
+uint8_t iter_traj = 0;				// indicator for if trajectory should be iterated during PID loop
 
 Gripper Gripper_1_Cal;	// gripper 1
 Gripper Gripper_2_Cal;	// gripper 2
@@ -83,9 +84,9 @@ unsigned char msg_init[] = "Initialization done\r\n\r\n";
 unsigned char msg_wait[] = "Waiting for command\r\n";
 unsigned char msg_toggle[] = "Toggling gripper... ";
 unsigned char msg_power[] = "Toggling motor power... ";
-unsigned char msg_cal[] = "Reading motor positions... ";
+unsigned char msg_cal[] = "Zeroing motor positions... ";
 unsigned char msg_load[] = "Waiting for trajectory file... ";
-unsigned char msg_pwd[] = "Waiting for password... ";
+unsigned char msg_pwd[] = "Waiting for password (abc)... ";
 unsigned char msg_swing[] = "Starting swing... ";
 /* USER CODE END PV */
 
@@ -103,6 +104,7 @@ Gripper* get_release_hand(void);
 void update_motor_cntl() {
 	if(traj_is_finished(&traj) == 1) {
 		finish_traj();
+		return;
 	}
 
 	if(traj.cmode == 12) {
@@ -133,7 +135,9 @@ void update_motor_cntl() {
 	}
 
 	send_voltage(&hcan1, motors);
-	update_traj(&traj);
+
+	if(iter_traj)
+		update_traj(&traj);
 
 //	for(uint8_t i = 0; i < 4; ++i) {
 //		pid_update(&motor_cntlrs[i], ref[i], motors[i].vel);
@@ -177,10 +181,10 @@ void traj_load_done() {
   * @brief	Send some info over USART, for debugging
   */
 void send_serial() {
-	unsigned char byte_ptr[22];
+	unsigned char byte_ptr[30];
 	uint8_t len = sizeof(byte_ptr) / sizeof(byte_ptr[0]);
 
-	sprintf(&byte_ptr[0], "%4d\t%4d\t%4d\t%4d\r\n", motors[0].pos, motors[1].pos, motors[2].pos, motors[3].pos);
+	sprintf(&byte_ptr[0], "%6d\t%6d\t%6d\t%6d\r\n", motors[0].pos, motors[1].pos, motors[2].pos, motors[3].pos);
 
 	HAL_UART_Transmit(&huart2, byte_ptr, len, HAL_MAX_DELAY);	// Send data
 
@@ -353,7 +357,7 @@ int main(void)
 	  		  HAL_Delay(100);	// Give motors time to send sensor feedback
 	  		  // Save the zero angle readings
 	  		  for(uint8_t i = 0; i < 4; ++i)
-	  			  motors[i].off = (float) motors[i].pos * TICK_TO_RAD;
+	  			  motors[i].off = motors[i].raw_pos;
 	  		  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);
 	  		  state = Wait;	// return to wait state
 	  		  break;
@@ -375,19 +379,21 @@ int main(void)
 	  		  state = Password;	// wait for correct sequence before turning on
 	  		  break;
 
+	  	  // Block until password entered - prevents an overloaded trajectory from accidentally messing things up
 	  	  case Password:
 	  		  HAL_UART_Transmit(&huart2, msg_pwd, sizeof(msg_pwd), 1000);
-	  		  uint8_t cnt = 0;
-	  		  while(cnt == 0) {
+	  		  uint8_t cnt = 'a';
+	  		  while(cnt != 'd') {
 	  			  while(HAL_UART_Receive(&huart2, &cmd, 1, 100) != HAL_OK);
-	  			  if(cmd != 'a')
-	  				  continue;
-	  			  while(HAL_UART_Receive(&huart2, &cmd, 1, 100) != HAL_OK);
-				  if(cmd != 'b')
-					  continue;
-				  while(HAL_UART_Receive(&huart2, &cmd, 1, 100) != HAL_OK);
-				  if(cmd == 'c')
-					  cnt = 1;
+	  			  if(cmd == cnt) {
+	  				  ++cnt;
+	  				  cmd = '.';
+	  				  HAL_UART_Transmit(&huart2, &cmd, 1, 100);
+	  			  } else {
+	  				  cnt = 'a';
+	  				  cmd = 'x';
+	  				  HAL_UART_Transmit(&huart2, &cmd, 1, 100);
+	  			  }
 	  		  }
 			  if(motors_on)
 				  power_on_motors();
@@ -400,8 +406,11 @@ int main(void)
 //	  		  release_hand = get_release_hand();	// determine gripper to be released
 	  		  HAL_UART_Transmit(&huart2, msg_swing, sizeof(msg_swing), 1000);
 	  		  swing_done = 0;
+	  		  iter_traj = 0;						// disable trajectory iteration
 //	  		  open_gripper(release_hand);			// release gripper, start swing
 	  		  HAL_TIM_Base_Start_IT(&htim9);		// enable timer interrupts for PID update
+	  		  HAL_Delay(2000);						// wait for motors to get to initial positions
+	  		  iter_traj = 1;						// allow trajectory to iterate
 //	  		  HAL_TIM_Base_Start_IT(&htim13);		// enable timer interrupts for gripper close
 	  		  while(!swing_done);
 	  		  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);

@@ -39,6 +39,7 @@ void motor_init(Motor* m, uint8_t id, uint8_t dir) {
 
 	m->volt = 0;
 
+	m->raw_pos = 0;
 	m->pos = 0;
 	m->num_turns = 0;
 	m->vel = 0;
@@ -115,40 +116,34 @@ void update_meas(CAN_HandleTypeDef* hcan) {
 	// Update motor feedback values
 	ind = hrx.StdId - CAN_ID_RCV_BASE - 1;
 
-//	if(motors[ind].dir == 1) {
-//		motors[ind].pos = (float) (((uint16_t) data[0]) << 8 | data[1]) * TICK_TO_RAD;
-//		motors[ind].vel = (float) (((uint16_t) data[2]) << 8 | data[3]) * RPM_TO_RADpS;
-//		motors[ind].cur = (int16_t) (((uint16_t) data[4]) << 8 | data[5]);
-//	} else {
-//		motors[ind].pos = (float) (8191 - (((uint16_t) data[0]) << 8 | data[1])) * TICK_TO_RAD;
-//		motors[ind].vel = (float) -(((uint16_t) data[2]) << 8 | data[3]) * RPM_TO_RADpS;
-//		motors[ind].cur = (int16_t) -(((uint16_t) data[4]) << 8 | data[5]);
-//	}
-
-
-
+	// Store previous position to check for wrap-around
 	old_pos = motors[ind].pos;
 
+	// Shift velocity history
 	for(uint8_t i = NUM_VEL_STORE-1; i > 0; --i)
 		motors[ind].vel_hist[i] = motors[ind].vel_hist[i-1];
 
-	motors[ind].pos = (int16_t) (((uint16_t) data[0]) << 8 | data[1]) - motors[ind].off;
+	motors[ind].raw_pos = ((uint16_t) data[0]) << 8 | data[1];					// Get raw position angle
 	motors[ind].vel_hist[0] = (int16_t) (((uint16_t) data[2]) << 8 | data[3]);
 	motors[ind].cur = (int16_t) (((uint16_t) data[4]) << 8 | data[5]);
 
+	// Find new average velocity
 	motors[ind].vel = 0;
 	for(uint8_t i = 0; i < NUM_VEL_STORE; ++i)
 		motors[ind].vel += motors[ind].vel_hist[i];
 	motors[ind].vel /= NUM_VEL_STORE;
 
+	// Modify data if motor is negative
 	if(motors[ind].dir == -1) {
-		motors[ind].pos = 8191 - motors[ind].pos;
-		motors[ind].vel *= -1;
-		motors[ind].cur *= -1;
+		motors[ind].raw_pos = 8191 - motors[ind].raw_pos;	// complement raw angle
+		motors[ind].vel *= -1;								// negate velocity
+		motors[ind].cur *= -1;								// negate current
 	}
 
-	motors[ind].pos += motors[ind].num_turns * 8192;	// Incorporate angle wrapping
+	motors[ind].pos = motors[ind].raw_pos - motors[ind].off;	// Add zeroing offset
+	motors[ind].pos += motors[ind].num_turns * 8192;			// Incorporate angle wrapping
 
+	// Check for angle wrapping
 	if(motors[ind].pos - old_pos > 8000) {
 		--motors[ind].num_turns;
 		motors[ind].pos -= 8192;
