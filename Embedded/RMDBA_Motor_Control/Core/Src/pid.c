@@ -15,11 +15,11 @@
   * @param	u_max Maximum allowable control output	(symmetric)
   * @param	d_ref_wt Derivative controller setpoint weight (if not used, set to 1)
   */
-void pid_init(PID_Controller* cntlr, double kp, double ki, double kd, double ts, double i_max, double u_max, double d_ref_wt) {
+void pid_init(PID_Controller* cntlr, float kp, float ki, float kd, float ts, float i_max, float u_max, float d_ref_wt) {
 	// Move control parameters into controller structure.
 	cntlr->kp = kp;
-	cntlr->ki = ki;
-	cntlr->kd = kd;
+	cntlr->ki = ki * ts;
+	cntlr->kd = kd / ts;
 	cntlr->ts = ts;
 	cntlr->i_max = i_max;
 	cntlr->u_max = u_max;
@@ -39,15 +39,16 @@ void pid_init(PID_Controller* cntlr, double kp, double ki, double kd, double ts,
   * @param	ref Desired value
   * @param	meas Measured value
   */
-void pid_update(PID_Controller* cntlr, double ref, double meas) {
+void pid_update(PID_Controller* cntlr, float ref, float meas) {
 	// Declare local variables
-	double e, up, ui, ud;
+	float e, up, ui, ud;
 
 	// Calculate error;
 	e = ref - meas;
 
 	// Update error integral
-	cntlr->i_sum += cntlr->ts * e;
+//	cntlr->i_sum += cntlr->ts * e;
+	cntlr->i_sum += e;
 	SATURATE(cntlr->i_sum, cntlr->i_max);
 
 	// Calculate proportional control effort
@@ -57,7 +58,8 @@ void pid_update(PID_Controller* cntlr, double ref, double meas) {
 	ui = cntlr->ki * cntlr->i_sum;
 
 	// Calculate derivative control effort
-	ud = cntlr->kd * (cntlr->d_ref_wt*(ref - cntlr->prev_ref) - (meas - cntlr->prev_meas)) / cntlr->ts;
+//	ud = cntlr->kd * (cntlr->d_ref_wt*(ref - cntlr->prev_ref) - (meas - cntlr->prev_meas)) / cntlr->ts;
+	ud = cntlr->kd * (cntlr->d_ref_wt*(ref - cntlr->prev_ref) - (meas - cntlr->prev_meas));
 
 	// Calculate total control effort
 	cntlr->u = up + ui + ud;

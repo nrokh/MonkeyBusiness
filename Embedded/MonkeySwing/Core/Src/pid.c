@@ -18,8 +18,8 @@
 void pid_init(PID_Controller* cntlr, float kp, float ki, float kd, float ts, float i_max, float u_max, float d_ref_wt) {
 	// Move control parameters into controller structure.
 	cntlr->kp = kp;
-	cntlr->ki = ki;
-	cntlr->kd = kd;
+	cntlr->ki = ki * ts;
+	cntlr->kd = kd / ts;
 	cntlr->ts = ts;
 	cntlr->i_max = i_max;
 	cntlr->u_max = u_max;
@@ -47,7 +47,7 @@ void pid_update(PID_Controller* cntlr, float ref, float meas) {
 	e = ref - meas;
 
 	// Update error integral
-	cntlr->i_sum += cntlr->ts * e;
+	cntlr->i_sum += e;
 	SATURATE(cntlr->i_sum, -cntlr->i_max, cntlr->i_max);
 
 	// Calculate proportional control effort
@@ -57,7 +57,7 @@ void pid_update(PID_Controller* cntlr, float ref, float meas) {
 	ui = cntlr->ki * cntlr->i_sum;
 
 	// Calculate derivative control effort
-	ud = cntlr->kd * (cntlr->d_ref_wt*(ref - cntlr->prev_ref) - (meas - cntlr->prev_meas)) / cntlr->ts;
+	ud = cntlr->kd * (cntlr->d_ref_wt*(ref - cntlr->prev_ref) - (meas - cntlr->prev_meas));
 
 	// Calculate total control effort
 	cntlr->u = up + ui + ud;

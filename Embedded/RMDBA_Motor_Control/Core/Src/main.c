@@ -30,6 +30,7 @@
 /* USER CODE BEGIN Includes */
 #include "pid.h"
 #include "gm6020.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,8 +50,12 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-PID_Controller cntlrs[4];
-int16_t ref[] = {0, 0, 0, 0};
+PID_Controller torq_cntlrs[4];
+PID_Controller vel_cntlrs[4];
+PID_Controller pos_cntlrs[4];
+//float ref[] = {0.0f, 0.0f, 0.0f, 2.0f};
+//float ref[] = {0, 0, 0, 1.5707f};
+float ref[] = {0, 0, 0, 6.283f};
 Motor motors[4];
 uint16_t pot_hist[100];
 int16_t avgtrack;
@@ -76,14 +81,24 @@ void motor_cntl_update() {
 	for(uint8_t i = 0; i < 100; ++i)
 		avg += pot_hist[i];
 	avg /= 100;
-	avgtrack = (avg - 2048) / 34;
 
-//	ref[3] = (avg - 2048) / 34;
+//	ref[3] = (float) (avg-2048) * 8 * TICK_TO_RAD;
 	for(uint8_t i = 0; i < 4; ++i) {
-		pid_update(&cntlrs[i], ref[i], motors[i].vel);
-		set_voltage(&motors[i], (int16_t) cntlrs[i].u);
+//		pid_update(&torq_cntlrs[i], ref[i], (float) motors[i].cur*MA_TO_NM);
+
+		pid_update(&vel_cntlrs[i], ref[i], (float) motors[i].vel*RPM_TO_RADpS);
+//		pid_update(&pos_cntlrs[i], ref[i], (float) motors[i].pos*TICK_TO_RAD);
+
+		pid_update(&torq_cntlrs[i], vel_cntlrs[i].u, (float) motors[i].cur*MA_TO_NM);
+		set_voltage(&motors[i], (int16_t) torq_cntlrs[i].u);
 	}
 	send_voltage(&hcan1, motors);
+
+	unsigned char byte_ptr[16];
+	sprintf(&byte_ptr[0], "%6d,%6d\r\n", (int16_t)(ref[3]/RPM_TO_RADpS), motors[3].vel);
+//	sprintf(&byte_ptr[0], "%6d,%6d\r\n", (int16_t)(ref[3]/MA_TO_NM), motors[3].cur);	// current, size 16
+	HAL_UART_Transmit(&huart2, byte_ptr, 16, HAL_MAX_DELAY);
+
 	return;
 }
 
@@ -91,25 +106,14 @@ void motor_cntl_update() {
   * @brief	Send some info over USART
   */
 void send_serial() {
-//	int16_t word = motors[3].volt;
-	int16_t word = avgtrack;
-	uint8_t byte_ptr[7];
-	uint8_t empty = 0;
+	unsigned char byte_ptr[28];
+	uint8_t len = sizeof(byte_ptr) / sizeof(byte_ptr[0]);
 
-	for(int8_t i = 4; i >= 0; --i) {
-		if(empty)
-			byte_ptr[i] = ' ';	// Pad with spaces
-		else
-			byte_ptr[i] = ((uint8_t) (word % 10)) + '0';	// Get next digit
-		word /= 10;	// Divide by 10 to prepare for next digit
-		if(!word)
-			empty = 1;	// Fill remaining bytes with padding
-	}
+//	ref[3] *= -1;
 
-	byte_ptr[5] = '\r';	// End with CR LF.
-	byte_ptr[6] = '\n';
+	sprintf(&byte_ptr[0], "%6d\t%6d\t%4d\t%6d\r\n", motors[3].volt, motors[3].cur, motors[3].vel, motors[3].pos);
 
-	HAL_UART_Transmit(&huart2, byte_ptr, 7, HAL_MAX_DELAY);	// Send data
+	HAL_UART_Transmit(&huart2, byte_ptr, len, HAL_MAX_DELAY);	// Send data
 
 	HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
 	return;
@@ -151,12 +155,19 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   // Initialize PID controllers
-  for(uint8_t i = 0; i < 4; ++i)
-	  pid_init(&cntlrs[i], 40, 3000, 0, 0.001, 30000, 30000, 1);
+  for(uint8_t i = 0; i < 4; ++i) {
+//	  pid_init(&pos_cntlrs[i], 100.0f, 10.0f, 8.0f, 0.001f, 2.0f, 5.0f, 1.0f);
+	  pid_init(&pos_cntlrs[i], 1.0f, 0.5f, 0.055f, 0.001f, 2.0f, 5.0f, 1.0f);
+	  pid_init(&vel_cntlrs[i], 0.08f, 50.0f, 0.0f, 0.001f, 2.0f, 5.0f, 1.0f);
+//	  pid_init(&torq_cntlrs[i], 50.0f, 10000.0f, 0.0f, 0.001f, 30000.0f, 30000.0f, 1.0f);
+	  pid_init(&torq_cntlrs[i], 3000.0f, 1250000.0f, 0.0f, 0.001f, 30000.0f, 30000.0f, 1.0f);
+//  pid_init(&cntlrs[i], 40, 3000, 0, 0.001, 30000, 30000, 1);
+  }
 
   // Initialize motors
   for(uint8_t i = 0; i < 4; ++i)
-	  motor_init(&motors[i], i+1);
+	  motor_init(&motors[i], i+1, -1);
+  motors[3].off = 4249;
 
   // Finish CAN initialization for robot motors.
   can_motors_init(&hcan1);
@@ -167,13 +178,11 @@ int main(void)
 
   // Enable CAN
   HAL_CAN_Start(&hcan1);
+  HAL_Delay(100);
 
   // Enable timer interrupts
   HAL_TIM_Base_Start_IT(&htim9);
   HAL_TIM_Base_Start_IT(&htim12);
-
-  set_voltage(&motors[0], 1000);
-//  send_voltage(&hcan1, &motors[0]);
   /* USER CODE END 2 */
 
   /* Infinite loop */

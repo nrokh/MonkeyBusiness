@@ -36,27 +36,27 @@ void reset_traj(Trajectory* traj) {
 uint8_t update_traj(Trajectory* traj) {
 	// Skip update if trajectory file has been fully iterated
 	if(traj_is_finished(traj) == 0) {
-		traj->torque[3] = *traj->curr_ptr++;	// load in next set of torque signals
-		traj->torque[1] = *traj->curr_ptr++;
-		traj->torque[2] = *traj->curr_ptr++;
-		traj->torque[1] = *traj->curr_ptr++;
-		traj->pos[3] = *traj->curr_ptr++;	// load in next set of position references
-		traj->pos[1] = *traj->curr_ptr++;
-		traj->pos[2] = *traj->curr_ptr++;
-		traj->pos[1] = *traj->curr_ptr++;
-		traj->vel[3] = *traj->curr_ptr++;	// load in next set of velocity references
-		traj->vel[1] = *traj->curr_ptr++;
-		traj->vel[2] = *traj->curr_ptr++;
-		traj->vel[1] = *traj->curr_ptr++;
+//		traj->torque[3] = *traj->curr_ptr++;	// load in next set of torque signals
+//		traj->torque[1] = *traj->curr_ptr++;
+//		traj->torque[2] = *traj->curr_ptr++;
+//		traj->torque[1] = *traj->curr_ptr++;
+//		traj->pos[3] = *traj->curr_ptr++;	// load in next set of position references
+//		traj->pos[1] = *traj->curr_ptr++;
+//		traj->pos[2] = *traj->curr_ptr++;
+//		traj->pos[1] = *traj->curr_ptr++;
+//		traj->vel[3] = *traj->curr_ptr++;	// load in next set of velocity references
+//		traj->vel[1] = *traj->curr_ptr++;
+//		traj->vel[2] = *traj->curr_ptr++;
+//		traj->vel[1] = *traj->curr_ptr++;
 
 
-//		for(uint8_t i = 0; i < 4; ++i)
-//			traj->torque[i] = *traj->curr_ptr++;	// Load in next set of torque signals
-//		for(uint8_t i = 0; i < 4; ++i)
-//			traj->pos[i] = *traj->curr_ptr++;		// Load in next set of position references
-//		for(uint8_t i = 0; i < 4; ++i)
-//			traj->vel[i] = *traj->curr_ptr++;		// Load in next set of velocity references
-		traj->cmode = *traj->curr_ptr++;			// Load in next contact mode
+		for(uint8_t i = 0; i < 4; ++i)
+			traj->torque[i] = *traj->curr_ptr++;	// Load in next set of torque signals
+		for(uint8_t i = 0; i < 4; ++i)
+			traj->pos[i] = *traj->curr_ptr++;		// Load in next set of position references
+		for(uint8_t i = 0; i < 4; ++i)
+			traj->vel[i] = *traj->curr_ptr++;		// Load in next set of velocity references
+		traj->cmode = (uint8_t) (*traj->curr_ptr++ + 0.5);			// Load in next contact mode
 		return 0;
 	}
 	return -1;

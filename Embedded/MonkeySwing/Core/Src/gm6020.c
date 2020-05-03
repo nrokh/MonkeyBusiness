@@ -40,6 +40,7 @@ void motor_init(Motor* m, uint8_t id, uint8_t dir) {
 	m->volt = 0;
 
 	m->pos = 0;
+	m->num_turns = 0;
 	m->vel = 0;
 	m->cur = 0;
 
@@ -56,7 +57,7 @@ void motor_init(Motor* m, uint8_t id, uint8_t dir) {
   */
 void set_voltage(Motor* m, int16_t v) {
 	SATURATE(v, VOLT_MIN, VOLT_MAX);	// Limit command to allowable range
-	m->volt = v;
+	m->volt = v * m->dir;
 	return;
 }
 
@@ -100,28 +101,61 @@ void send_voltage(CAN_HandleTypeDef* hcan, Motor* m_ptr) {
   */
 void update_meas(CAN_HandleTypeDef* hcan) {
 	// External variables
-	extern Motor motors[];
+	extern Motor motors[4];
 
 	// Local variables
 	uint8_t data[8];
 	CAN_RxHeaderTypeDef hrx;
 	uint8_t ind;
+	int16_t old_pos;
 
 	// Get next message
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &hrx, data);
 
 	// Update motor feedback values
 	ind = hrx.StdId - CAN_ID_RCV_BASE - 1;
-	if(motors[ind].dir == 1) {
-		motors[ind].pos = (float) (((uint16_t) data[0]) << 8 | data[1]) * TICK_TO_RAD;
-		motors[ind].vel = (float) (((uint16_t) data[2]) << 8 | data[3]) * RPM_TO_RADpS;
-		motors[ind].cur = (int16_t) (((uint16_t) data[4]) << 8 | data[5]);
-	} else {
-		motors[ind].pos = (float) (8191 - (((uint16_t) data[0]) << 8 | data[1])) * TICK_TO_RAD;
-		motors[ind].vel = (float) -(((uint16_t) data[2]) << 8 | data[3]) * RPM_TO_RADpS;
-		motors[ind].cur = (int16_t) -(((uint16_t) data[4]) << 8 | data[5]);
+
+//	if(motors[ind].dir == 1) {
+//		motors[ind].pos = (float) (((uint16_t) data[0]) << 8 | data[1]) * TICK_TO_RAD;
+//		motors[ind].vel = (float) (((uint16_t) data[2]) << 8 | data[3]) * RPM_TO_RADpS;
+//		motors[ind].cur = (int16_t) (((uint16_t) data[4]) << 8 | data[5]);
+//	} else {
+//		motors[ind].pos = (float) (8191 - (((uint16_t) data[0]) << 8 | data[1])) * TICK_TO_RAD;
+//		motors[ind].vel = (float) -(((uint16_t) data[2]) << 8 | data[3]) * RPM_TO_RADpS;
+//		motors[ind].cur = (int16_t) -(((uint16_t) data[4]) << 8 | data[5]);
+//	}
+
+
+
+	old_pos = motors[ind].pos;
+
+	for(uint8_t i = NUM_VEL_STORE-1; i > 0; --i)
+		motors[ind].vel_hist[i] = motors[ind].vel_hist[i-1];
+
+	motors[ind].pos = (int16_t) (((uint16_t) data[0]) << 8 | data[1]) - motors[ind].off;
+	motors[ind].vel_hist[0] = (int16_t) (((uint16_t) data[2]) << 8 | data[3]);
+	motors[ind].cur = (int16_t) (((uint16_t) data[4]) << 8 | data[5]);
+
+	motors[ind].vel = 0;
+	for(uint8_t i = 0; i < NUM_VEL_STORE; ++i)
+		motors[ind].vel += motors[ind].vel_hist[i];
+	motors[ind].vel /= NUM_VEL_STORE;
+
+	if(motors[ind].dir == -1) {
+		motors[ind].pos = 8191 - motors[ind].pos;
+		motors[ind].vel *= -1;
+		motors[ind].cur *= -1;
 	}
 
+	motors[ind].pos += motors[ind].num_turns * 8192;	// Incorporate angle wrapping
+
+	if(motors[ind].pos - old_pos > 8000) {
+		--motors[ind].num_turns;
+		motors[ind].pos -= 8192;
+	} else if(motors[ind].pos - old_pos < -8000) {
+		++motors[ind].num_turns;
+		motors[ind].pos += 8192;
+	}
 	return;
 }
 
@@ -130,6 +164,7 @@ void update_meas(CAN_HandleTypeDef* hcan) {
   */
 void power_on_motors() {
 	HAL_GPIO_WritePin(GPIOH, (POWER1_CTRL_Pin | POWER2_CTRL_Pin | POWER3_CTRL_Pin | POWER4_CTRL_Pin), GPIO_PIN_SET);
+	HAL_Delay(500);	// Give motors some time to turn on, otherwise will jerk on startup
 	return;
 }
 

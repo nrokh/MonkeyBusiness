@@ -29,7 +29,7 @@ typedef struct Trajectory {
 	traj_t pos[4];		// active position reference
 	traj_t vel[4];		// active velocity reference
 	traj_t torque[4];	// active torque signal
-	traj_t cmode;		// active contact mode
+	uint8_t cmode;		// active contact mode
 } Trajectory;
 
 // Function Prototypes

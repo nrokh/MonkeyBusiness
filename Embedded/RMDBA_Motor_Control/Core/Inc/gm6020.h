@@ -14,6 +14,11 @@
 #define CAN_ID_RCV_BASE 0x204
 #define VOLT_MAX 30000
 #define VOLT_MIN -30000
+#define TICK_TO_RAD 7.6708403213033652507e-4
+#define RPM_TO_RADpS 1.047197551196597746e-1
+//#define MA_TO_NM 7.41e-4
+#define MA_TO_NM 1.5e-4
+#define NUM_VEL_STORE 1
 
 // Structure definitions
 /**
@@ -28,16 +33,23 @@ typedef struct Motor {
 	int16_t volt;	// Voltage control signal
 
 	// Feedback signals
-	uint16_t pos;	// Angular position feedback
+	int16_t pos;	// Angular position feedback
+	int8_t num_turns;
 	int16_t vel;	// Angular velocity feedback
 	int16_t cur;	// Torque current feedback
+
+	int16_t vel_hist[NUM_VEL_STORE];
+
+	// Direction parameters
+	int8_t dir;		// direction scaling
+	uint16_t off;	// angle position offset
 } Motor;
 
 // Function prototypes
 /**
   * @brief	Motor initialization
   */
-void motor_init(Motor* m, uint8_t id);
+void motor_init(Motor* m, uint8_t id, uint8_t dir);
 
 /**
   * @brief	Set the motor voltage

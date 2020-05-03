@@ -37,13 +37,13 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef enum {Init, Wait, Toggle, Power, Cal, Load, Swing} State;
+typedef enum {Init, Wait, Toggle, Power, Cal, Load, Password, Swing} State;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 //#define TRAJ_FILE_STEPS 9	// Number of time steps in the trajectory
-#define TRAJ_FILE_BYTES 58968	// Trajectory file size, in units of bytes (MUST be the exact file size)
+#define TRAJ_FILE_BYTES 152880	// Trajectory file size, in units of bytes (MUST be the exact file size)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -61,7 +61,7 @@ PID_Controller motor_cntlrs[4];	// motor PID controller (technically voltage, wh
 int16_t ref[] = {0, 0, 0, 0};	// motor reference (for debugging)
 
 Motor motors[4];						// motors
-int8_t motor_dirs[4] = {-1, 1, 1, -1};	// motor directions
+int8_t motor_dirs[4] = {1, -1, -1, 1};	// motor directions
 uint8_t motors_on = 0;					// indicates if motors are on (1) or off (2)
 
 Trajectory traj;					// trajectory iterator
@@ -85,6 +85,7 @@ unsigned char msg_toggle[] = "Toggling gripper... ";
 unsigned char msg_power[] = "Toggling motor power... ";
 unsigned char msg_cal[] = "Reading motor positions... ";
 unsigned char msg_load[] = "Waiting for trajectory file... ";
+unsigned char msg_pwd[] = "Waiting for password... ";
 unsigned char msg_swing[] = "Starting swing... ";
 /* USER CODE END PV */
 
@@ -104,7 +105,7 @@ void update_motor_cntl() {
 		finish_traj();
 	}
 
-	if(traj.cmode == 12.0) {
+	if(traj.cmode == 12) {
 		close_gripper(&Gripper_2_Cal);
 	} else {
 		open_gripper(&Gripper_2_Cal);
@@ -124,9 +125,12 @@ void update_motor_cntl() {
 //		pid_update(&motor_cntlrs[i], vel_cntlrs[i].u, motors[i].cur);
 //		set_voltage(&motors[i], (int16_t) (motor_cntlrs[i].u+traj.torque[i]));
 //	}
-	pid_update(&pos_cntlrs[0], traj.pos[0], motors[0].pos-motors[0].off);
-	pid_update(&motor_cntlrs[0], pos_cntlrs[0].u, motors[0].vel);
-	set_voltage(&motors[0], (int16_t) (motor_cntlrs[0].u));
+	for(uint8_t i = 0; i < 4; ++i) {
+		pid_update(&pos_cntlrs[i], traj.pos[i], (float) motors[i].pos*TICK_TO_RAD);
+		pid_update(&vel_cntlrs[i], traj.vel[i], (float) motors[i].vel*RPM_TO_RADpS);
+		pid_update(&motor_cntlrs[i], pos_cntlrs[i].u+vel_cntlrs[i].u, (float) motors[i].cur*MA_TO_NM+traj.torque[i]);
+		set_voltage(&motors[i], (int16_t) motor_cntlrs[i].u);
+	}
 
 	send_voltage(&hcan1, motors);
 	update_traj(&traj);
@@ -166,7 +170,6 @@ void finish_traj() {
   */
 void traj_load_done() {
 	file_tx_done = 1;
-	HAL_Delay(1000);
 	return;
 }
 
@@ -245,19 +248,19 @@ int main(void)
 
   // Initialize PID controllers for position (outer-most loop of cascade architecture)
   for(uint8_t i = 0; i < 2; ++i)
-  	  pid_init(&pos_cntlrs[i], 100, 10.0, 0.1, 0.005, 0, 0, 1);
+	  pid_init(&pos_cntlrs[i], 1.0, 0.5, 0.055, 0.001, 2.0, 5.0, 1.0);
   for(uint8_t i = 2; i < 4; ++i)
-  	  pid_init(&pos_cntlrs[i], 100, 10.0, 0.1, 0.005, 0, 0, 1);
+	  pid_init(&pos_cntlrs[i], 1.0, 0.5, 0.055, 0.001, 2.0, 5.0, 1.0);
 
   // Initialize PID controllers for velocity (middle loop of cascade architecture)
   for(uint8_t i = 0; i < 2; ++i)
-   	  pid_init(&vel_cntlrs[i], 100.0, 10.0, 0.1, 0.005, 0, 0, 1);
+	  pid_init(&vel_cntlrs[i], 0.08, 50.0, 0.0, 0.001, 2.0, 5.0, 1.0);
   for(uint8_t i = 2; i < 4; ++i)
-   	  pid_init(&vel_cntlrs[i], 100.0, 10.0, 0.1, 0.005, 0, 0, 1);
+	  pid_init(&vel_cntlrs[i], 0.08, 50.0, 0.0, 0.001, 2.0, 5.0, 1.0);
 
   // Initialize PID controllers for motors (inner-most loop of cascade architecture)
   for(uint8_t i = 0; i < 4; ++i)
-	  pid_init(&motor_cntlrs[i], 40, 3000, 0, 0.001, 30000, 30000, 1);
+	  pid_init(&motor_cntlrs[i], 3000.0, 1250000.0, 0.0, 0.001, 30000.0, 30000.0, 1.0);
 
   // Initialize trajectory structure
   init_traj(&traj, &traj_arr[0], TRAJ_FILE_SIZE);
@@ -338,10 +341,6 @@ int main(void)
 	  		  } else {
 	  			  // Turn motors on
 	  			  power_on_motors();
-	  			  HAL_Delay(500);	// Give motors some time to turn on, otherwise will jerk on startup
-	  			  for(uint8_t i = 0; i < 4; ++i)
-	  				  set_voltage(&motors[i], 0);
-	  			  send_voltage(&hcan1, motors);
 	  			  motors_on = 1;
 	  		  }
 	  		  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);
@@ -362,13 +361,39 @@ int main(void)
 	  	  // Load trajectory state - wait until the trajectory file of the exact specified size is received over UART
 	  	  case Load:	// NOTE: Cannot receive a new command until the entire file is received
 	  		  HAL_UART_Transmit(&huart2, msg_load, sizeof(msg_load), 1000);
-	  		  file_tx_done = 0;
-	  		  HAL_UART_Receive_DMA(&huart2, &traj_arr[0], TRAJ_FILE_BYTES);	// Set up UART for file transfer
-	  		  while(!file_tx_done);	// wait for transfer to finish
+	  		  power_off_motors();
+//	  		  file_tx_done = 0;
+	  		  for(uint32_t ind = 0; ind < TRAJ_FILE_BYTES; ind += 0xffff) {
+		  		  file_tx_done = 0;
+	  			  HAL_UART_Receive_DMA(&huart2, &traj_arr[ind], (TRAJ_FILE_BYTES-ind>0xffff ? 0xffff : TRAJ_FILE_BYTES-ind));
+	  			  while(!file_tx_done);	// wait for transfer to finish
+	  		  }
+//	  		  HAL_UART_Receive_DMA(&huart2, &traj_arr[0], TRAJ_FILE_BYTES);	// Set up UART for file transfer
+//	  		  while(!file_tx_done);	// wait for transfer to finish
 	  		  reset_traj(&traj);	// Load in first set of data
 	  		  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);
-	  		  state = Wait;	// return to wait state
+	  		  state = Password;	// wait for correct sequence before turning on
 	  		  break;
+
+	  	  case Password:
+	  		  HAL_UART_Transmit(&huart2, msg_pwd, sizeof(msg_pwd), 1000);
+	  		  uint8_t cnt = 0;
+	  		  while(cnt == 0) {
+	  			  while(HAL_UART_Receive(&huart2, &cmd, 1, 100) != HAL_OK);
+	  			  if(cmd != 'a')
+	  				  continue;
+	  			  while(HAL_UART_Receive(&huart2, &cmd, 1, 100) != HAL_OK);
+				  if(cmd != 'b')
+					  continue;
+				  while(HAL_UART_Receive(&huart2, &cmd, 1, 100) != HAL_OK);
+				  if(cmd == 'c')
+					  cnt = 1;
+	  		  }
+			  if(motors_on)
+				  power_on_motors();
+			  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);
+			  state = Wait;	// return to wait state
+			  break;
 
 	  	  // Swing state - Use PID to follow trajectory file
 	  	  case Swing:
