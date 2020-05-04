@@ -1,0 +1,26 @@
+x
+x - le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) - sin(p)*(lb3 + lb1*cos(q1)) - lb1*cos(p)*sin(q1)
+
+
+x - le2*(cos(p)*sin(q2) + cos(q2)*sin(p)) - sin(p)*(lb3 + lb2*cos(q2)) - lb2*cos(p)*sin(q2)
+
+
+x + le3*sin(p)
+
+
+x - lb3*sin(p)
+
+
+y
+y + le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + cos(p)*(lb3 + lb1*cos(q1)) - lb1*sin(p)*sin(q1)
+
+
+y + le2*(cos(p)*cos(q2) - sin(p)*sin(q2)) + cos(p)*(lb3 + lb2*cos(q2)) - lb2*sin(p)*sin(q2)
+
+
+y - le3*cos(p)
+
+
+y + lb3*cos(p)
+
+

@@ -1,0 +1,144 @@
+CM 1 ax
+x - le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) - sin(p)*(lb3 + lb1*cos(q1)) - lb1*cos(p)*sin(q1)
+
+
+CM 1 ay
+y + le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + cos(p)*(lb3 + lb1*cos(q1)) - lb1*sin(p)*sin(q1)
+
+
+CM 1 Ax*dq
+dx - dq1*(le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + lb1*cos(p)*cos(q1) - lb1*sin(p)*sin(q1)) - dp*(le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + cos(p)*(lb3 + lb1*cos(q1)) - lb1*sin(p)*sin(q1))
+
+
+CM 1 Ay*dq
+dy - dq1*(le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) + lb1*cos(p)*sin(q1) + lb1*cos(q1)*sin(p)) - dp*(le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) + sin(p)*(lb3 + lb1*cos(q1)) + lb1*cos(p)*sin(q1))
+
+
+CM 1 Ax*ddq + Adx*dq
+ddx + dp*(le1*(dp*cos(p)*sin(q1) + dp*cos(q1)*sin(p) + dq1*cos(p)*sin(q1) + dq1*cos(q1)*sin(p)) + dp*sin(p)*(lb3 + lb1*cos(q1)) + dp*lb1*cos(p)*sin(q1) + dq1*lb1*cos(p)*sin(q1) + dq1*lb1*cos(q1)*sin(p)) - ddq1*(le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + lb1*cos(p)*cos(q1) - lb1*sin(p)*sin(q1)) - ddp*(le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + cos(p)*(lb3 + lb1*cos(q1)) - lb1*sin(p)*sin(q1)) + dq1*(le1*(dp*cos(p)*sin(q1) + dp*cos(q1)*sin(p) + dq1*cos(p)*sin(q1) + dq1*cos(q1)*sin(p)) + dp*lb1*cos(p)*sin(q1) + dp*lb1*cos(q1)*sin(p) + dq1*lb1*cos(p)*sin(q1) + dq1*lb1*cos(q1)*sin(p))
+
+
+CM 1 Ay*ddq + Ady*dq
+ddy - dp*(le1*(dp*cos(p)*cos(q1) + dq1*cos(p)*cos(q1) - dp*sin(p)*sin(q1) - dq1*sin(p)*sin(q1)) + dp*cos(p)*(lb3 + lb1*cos(q1)) + dq1*lb1*cos(p)*cos(q1) - dp*lb1*sin(p)*sin(q1) - dq1*lb1*sin(p)*sin(q1)) - ddq1*(le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) + lb1*cos(p)*sin(q1) + lb1*cos(q1)*sin(p)) - ddp*(le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) + sin(p)*(lb3 + lb1*cos(q1)) + lb1*cos(p)*sin(q1)) - dq1*(le1*(dp*cos(p)*cos(q1) + dq1*cos(p)*cos(q1) - dp*sin(p)*sin(q1) - dq1*sin(p)*sin(q1)) + dp*lb1*cos(p)*cos(q1) + dq1*lb1*cos(p)*cos(q1) - dp*lb1*sin(p)*sin(q1) - dq1*lb1*sin(p)*sin(q1))
+
+
+CM 2 ax
+x - le2*(cos(p)*sin(q2) + cos(q2)*sin(p)) - sin(p)*(lb3 + lb2*cos(q2)) - lb2*cos(p)*sin(q2)
+
+
+CM 2 ay
+y + le2*(cos(p)*cos(q2) - sin(p)*sin(q2)) + cos(p)*(lb3 + lb2*cos(q2)) - lb2*sin(p)*sin(q2)
+
+
+CM 2 Ax*dq
+dx - dq2*(le2*(cos(p)*cos(q2) - sin(p)*sin(q2)) + lb2*cos(p)*cos(q2) - lb2*sin(p)*sin(q2)) - dp*(le2*(cos(p)*cos(q2) - sin(p)*sin(q2)) + cos(p)*(lb3 + lb2*cos(q2)) - lb2*sin(p)*sin(q2))
+
+
+CM 2 Ay*dq
+dy - dq2*(le2*(cos(p)*sin(q2) + cos(q2)*sin(p)) + lb2*cos(p)*sin(q2) + lb2*cos(q2)*sin(p)) - dp*(le2*(cos(p)*sin(q2) + cos(q2)*sin(p)) + sin(p)*(lb3 + lb2*cos(q2)) + lb2*cos(p)*sin(q2))
+
+
+CM 2 Ax*ddq + Adx*dq
+ddx + dp*(le2*(dp*cos(p)*sin(q2) + dp*cos(q2)*sin(p) + dq2*cos(p)*sin(q2) + dq2*cos(q2)*sin(p)) + dp*sin(p)*(lb3 + lb2*cos(q2)) + dp*lb2*cos(p)*sin(q2) + dq2*lb2*cos(p)*sin(q2) + dq2*lb2*cos(q2)*sin(p)) - ddq2*(le2*(cos(p)*cos(q2) - sin(p)*sin(q2)) + lb2*cos(p)*cos(q2) - lb2*sin(p)*sin(q2)) - ddp*(le2*(cos(p)*cos(q2) - sin(p)*sin(q2)) + cos(p)*(lb3 + lb2*cos(q2)) - lb2*sin(p)*sin(q2)) + dq2*(le2*(dp*cos(p)*sin(q2) + dp*cos(q2)*sin(p) + dq2*cos(p)*sin(q2) + dq2*cos(q2)*sin(p)) + dp*lb2*cos(p)*sin(q2) + dp*lb2*cos(q2)*sin(p) + dq2*lb2*cos(p)*sin(q2) + dq2*lb2*cos(q2)*sin(p))
+
+
+CM 2 Ay*ddq + Ady*dq
+ddy - dp*(le2*(dp*cos(p)*cos(q2) + dq2*cos(p)*cos(q2) - dp*sin(p)*sin(q2) - dq2*sin(p)*sin(q2)) + dp*cos(p)*(lb3 + lb2*cos(q2)) + dq2*lb2*cos(p)*cos(q2) - dp*lb2*sin(p)*sin(q2) - dq2*lb2*sin(p)*sin(q2)) - ddq2*(le2*(cos(p)*sin(q2) + cos(q2)*sin(p)) + lb2*cos(p)*sin(q2) + lb2*cos(q2)*sin(p)) - ddp*(le2*(cos(p)*sin(q2) + cos(q2)*sin(p)) + sin(p)*(lb3 + lb2*cos(q2)) + lb2*cos(p)*sin(q2)) - dq2*(le2*(dp*cos(p)*cos(q2) + dq2*cos(p)*cos(q2) - dp*sin(p)*sin(q2) - dq2*sin(p)*sin(q2)) + dp*lb2*cos(p)*cos(q2) + dq2*lb2*cos(p)*cos(q2) - dp*lb2*sin(p)*sin(q2) - dq2*lb2*sin(p)*sin(q2))
+
+
+Reset to CM1
+(I1 + lb1^2*m1)*(dq1 - dq1m) - phat1y*(le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) + lb1*cos(p)*sin(q1) + lb1*cos(q1)*sin(p)) - phat1x*(le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + lb1*cos(p)*cos(q1) - lb1*sin(p)*sin(q1)) + (dp - dpm)*(I1 + lb1^2*m1 + lb1*lb3*m1*cos(q1)) - lb1*m1*cos(p + q1)*(dx - dxm) - lb1*m1*sin(p + q1)*(dy - dym)
+
+
+(I2 + lb2^2*m2)*(dq2 - dq2m) + (dp - dpm)*(I2 + lb2^2*m2 + lb2*lb3*m2*cos(q2)) - lb2*m2*cos(p + q2)*(dx - dxm) - lb2*m2*sin(p + q2)*(dy - dym)
+
+
+phat1x - (dp - dpm)*(lb3*m1*cos(p) + lb3*m2*cos(p) + lb1*m1*cos(p + q1) + lb2*m2*cos(p + q2)) + (dx - dxm)*(m1 + m2 + m3) - lb1*m1*cos(p + q1)*(dq1 - dq1m) - lb2*m2*cos(p + q2)*(dq2 - dq2m)
+
+
+phat1y - (dp - dpm)*(lb3*m1*sin(p) + lb3*m2*sin(p) + lb1*m1*sin(p + q1) + lb2*m2*sin(p + q2)) + (dy - dym)*(m1 + m2 + m3) - lb1*m1*sin(p + q1)*(dq1 - dq1m) - lb2*m2*sin(p + q2)*(dq2 - dq2m)
+
+
+(dp - dpm)*(I1 + I2 + I3 + lb1^2*m1 + lb2^2*m2 + lb3^2*m1 + lb3^2*m2 + 2*lb1*lb3*m1*cos(q1) + 2*lb2*lb3*m2*cos(q2)) - (dy - dym)*(lb3*m1*sin(p) + lb3*m2*sin(p) + lb1*m1*sin(p + q1) + lb2*m2*sin(p + q2)) - (dx - dxm)*(lb3*m1*cos(p) + lb3*m2*cos(p) + lb1*m1*cos(p + q1) + lb2*m2*cos(p + q2)) + (dq1 - dq1m)*(I1 + lb1^2*m1 + lb1*lb3*m1*cos(q1)) + (dq2 - dq2m)*(I2 + lb2^2*m2 + lb2*lb3*m2*cos(q2)) - phat1y*(le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) + sin(p)*(lb3 + lb1*cos(q1)) + lb1*cos(p)*sin(q1)) - phat1x*(le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + cos(p)*(lb3 + lb1*cos(q1)) - lb1*sin(p)*sin(q1))
+
+
+Reset to CM2
+(I1 + lb1^2*m1)*(dq1 - dq1m) + (dp - dpm)*(I1 + lb1^2*m1 + lb1*lb3*m1*cos(q1)) - lb1*m1*cos(p + q1)*(dx - dxm) - lb1*m1*sin(p + q1)*(dy - dym)
+
+
+(I2 + lb2^2*m2)*(dq2 - dq2m) - phat2y*(le2*(cos(p)*sin(q2) + cos(q2)*sin(p)) + lb2*cos(p)*sin(q2) + lb2*cos(q2)*sin(p)) - phat2x*(le2*(cos(p)*cos(q2) - sin(p)*sin(q2)) + lb2*cos(p)*cos(q2) - lb2*sin(p)*sin(q2)) + (dp - dpm)*(I2 + lb2^2*m2 + lb2*lb3*m2*cos(q2)) - lb2*m2*cos(p + q2)*(dx - dxm) - lb2*m2*sin(p + q2)*(dy - dym)
+
+
+phat2x - (dp - dpm)*(lb3*m1*cos(p) + lb3*m2*cos(p) + lb1*m1*cos(p + q1) + lb2*m2*cos(p + q2)) + (dx - dxm)*(m1 + m2 + m3) - lb1*m1*cos(p + q1)*(dq1 - dq1m) - lb2*m2*cos(p + q2)*(dq2 - dq2m)
+
+
+phat2y - (dp - dpm)*(lb3*m1*sin(p) + lb3*m2*sin(p) + lb1*m1*sin(p + q1) + lb2*m2*sin(p + q2)) + (dy - dym)*(m1 + m2 + m3) - lb1*m1*sin(p + q1)*(dq1 - dq1m) - lb2*m2*sin(p + q2)*(dq2 - dq2m)
+
+
+(dp - dpm)*(I1 + I2 + I3 + lb1^2*m1 + lb2^2*m2 + lb3^2*m1 + lb3^2*m2 + 2*lb1*lb3*m1*cos(q1) + 2*lb2*lb3*m2*cos(q2)) - (dy - dym)*(lb3*m1*sin(p) + lb3*m2*sin(p) + lb1*m1*sin(p + q1) + lb2*m2*sin(p + q2)) - (dx - dxm)*(lb3*m1*cos(p) + lb3*m2*cos(p) + lb1*m1*cos(p + q1) + lb2*m2*cos(p + q2)) + (dq1 - dq1m)*(I1 + lb1^2*m1 + lb1*lb3*m1*cos(q1)) + (dq2 - dq2m)*(I2 + lb2^2*m2 + lb2*lb3*m2*cos(q2)) - phat2y*(le2*(cos(p)*sin(q2) + cos(q2)*sin(p)) + sin(p)*(lb3 + lb2*cos(q2)) + lb2*cos(p)*sin(q2)) - phat2x*(le2*(cos(p)*cos(q2) - sin(p)*sin(q2)) + cos(p)*(lb3 + lb2*cos(q2)) - lb2*sin(p)*sin(q2))
+
+
+Reset to CM12
+(I1 + lb1^2*m1)*(dq1 - dq1m) - phat1y*(le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) + lb1*cos(p)*sin(q1) + lb1*cos(q1)*sin(p)) - phat1x*(le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + lb1*cos(p)*cos(q1) - lb1*sin(p)*sin(q1)) + (dp - dpm)*(I1 + lb1^2*m1 + lb1*lb3*m1*cos(q1)) - lb1*m1*cos(p + q1)*(dx - dxm) - lb1*m1*sin(p + q1)*(dy - dym)
+
+
+(I2 + lb2^2*m2)*(dq2 - dq2m) - phat2y*(le2*(cos(p)*sin(q2) + cos(q2)*sin(p)) + lb2*cos(p)*sin(q2) + lb2*cos(q2)*sin(p)) - phat2x*(le2*(cos(p)*cos(q2) - sin(p)*sin(q2)) + lb2*cos(p)*cos(q2) - lb2*sin(p)*sin(q2)) + (dp - dpm)*(I2 + lb2^2*m2 + lb2*lb3*m2*cos(q2)) - lb2*m2*cos(p + q2)*(dx - dxm) - lb2*m2*sin(p + q2)*(dy - dym)
+
+
+phat1x + phat2x - (dp - dpm)*(lb3*m1*cos(p) + lb3*m2*cos(p) + lb1*m1*cos(p + q1) + lb2*m2*cos(p + q2)) + (dx - dxm)*(m1 + m2 + m3) - lb1*m1*cos(p + q1)*(dq1 - dq1m) - lb2*m2*cos(p + q2)*(dq2 - dq2m)
+
+
+phat1y + phat2y - (dp - dpm)*(lb3*m1*sin(p) + lb3*m2*sin(p) + lb1*m1*sin(p + q1) + lb2*m2*sin(p + q2)) + (dy - dym)*(m1 + m2 + m3) - lb1*m1*sin(p + q1)*(dq1 - dq1m) - lb2*m2*sin(p + q2)*(dq2 - dq2m)
+
+
+(dp - dpm)*(I1 + I2 + I3 + lb1^2*m1 + lb2^2*m2 + lb3^2*m1 + lb3^2*m2 + 2*lb1*lb3*m1*cos(q1) + 2*lb2*lb3*m2*cos(q2)) - (dy - dym)*(lb3*m1*sin(p) + lb3*m2*sin(p) + lb1*m1*sin(p + q1) + lb2*m2*sin(p + q2)) - (dx - dxm)*(lb3*m1*cos(p) + lb3*m2*cos(p) + lb1*m1*cos(p + q1) + lb2*m2*cos(p + q2)) + (dq1 - dq1m)*(I1 + lb1^2*m1 + lb1*lb3*m1*cos(q1)) + (dq2 - dq2m)*(I2 + lb2^2*m2 + lb2*lb3*m2*cos(q2)) - phat1y*(le1*(cos(p)*sin(q1) + cos(q1)*sin(p)) + sin(p)*(lb3 + lb1*cos(q1)) + lb1*cos(p)*sin(q1)) - phat1x*(le1*(cos(p)*cos(q1) - sin(p)*sin(q1)) + cos(p)*(lb3 + lb1*cos(q1)) - lb1*sin(p)*sin(q1)) - phat2y*(le2*(cos(p)*sin(q2) + cos(q2)*sin(p)) + sin(p)*(lb3 + lb2*cos(q2)) + lb2*cos(p)*sin(q2)) - phat2x*(le2*(cos(p)*cos(q2) - sin(p)*sin(q2)) + cos(p)*(lb3 + lb2*cos(q2)) - lb2*sin(p)*sin(q2))
+
+
+qdd equations CM 1 
+I1*ddp - u1 + I1*ddq1 + lam1X*lb1*cos(p + q1) + lam1X*le1*cos(p + q1) + lam1Y*lb1*sin(p + q1) + lam1Y*le1*sin(p + q1) - (981*lb1*m1*sin(p + q1))/100 + ddp*lb1^2*m1 + ddq1*lb1^2*m1 - ddx*lb1*m1*cos(p + q1) - ddy*lb1*m1*sin(p + q1) + dp^2*lb1*lb3*m1*sin(q1) + ddp*lb1*lb3*m1*cos(q1)
+
+
+ddq2*(I2 + lb2^2*m2) - u2 + ddp*(I2 + lb2^2*m2 + lb2*lb3*m2*cos(q2)) - (981*lb2*m2*sin(p + q2))/100 - ddx*lb2*m2*cos(p + q2) - ddy*lb2*m2*sin(p + q2) + dp^2*lb2*lb3*m2*sin(q2)
+
+
+ddx*m1 - lam1X + ddx*m2 + ddx*m3 - ddp*lb1*m1*cos(p + q1) - ddp*lb2*m2*cos(p + q2) - ddq1*lb1*m1*cos(p + q1) - ddq2*lb2*m2*cos(p + q2) - ddp*lb3*m1*cos(p) - ddp*lb3*m2*cos(p) + dp^2*lb1*m1*sin(p + q1) + dp^2*lb2*m2*sin(p + q2) + dq1^2*lb1*m1*sin(p + q1) + dq2^2*lb2*m2*sin(p + q2) + dp^2*lb3*m1*sin(p) + dp^2*lb3*m2*sin(p) + 2*dp*dq1*lb1*m1*sin(p + q1) + 2*dp*dq2*lb2*m2*sin(p + q2)
+
+
+(981*m1)/100 - lam1Y + (981*m2)/100 + (981*m3)/100 + ddy*m1 + ddy*m2 + ddy*m3 - ddp*lb1*m1*sin(p + q1) - ddp*lb2*m2*sin(p + q2) - ddq1*lb1*m1*sin(p + q1) - ddq2*lb2*m2*sin(p + q2) - ddp*lb3*m1*sin(p) - ddp*lb3*m2*sin(p) - dp^2*lb1*m1*cos(p + q1) - dp^2*lb2*m2*cos(p + q2) - dq1^2*lb1*m1*cos(p + q1) - dq2^2*lb2*m2*cos(p + q2) - dp^2*lb3*m1*cos(p) - dp^2*lb3*m2*cos(p) - 2*dp*dq1*lb1*m1*cos(p + q1) - 2*dp*dq2*lb2*m2*cos(p + q2)
+
+
+I1*ddp + I2*ddp + I3*ddp + I1*ddq1 + I2*ddq2 + lam1X*lb3*cos(p) + lam1Y*lb3*sin(p) - (981*lb3*m1*sin(p))/100 - (981*lb3*m2*sin(p))/100 + lam1X*lb1*cos(p + q1) + lam1X*le1*cos(p + q1) + lam1Y*lb1*sin(p + q1) + lam1Y*le1*sin(p + q1) - (981*lb1*m1*sin(p + q1))/100 - (981*lb2*m2*sin(p + q2))/100 + ddp*lb1^2*m1 + ddp*lb2^2*m2 + ddp*lb3^2*m1 + ddp*lb3^2*m2 + ddq1*lb1^2*m1 + ddq2*lb2^2*m2 - ddx*lb1*m1*cos(p + q1) - ddx*lb2*m2*cos(p + q2) - ddy*lb1*m1*sin(p + q1) - ddy*lb2*m2*sin(p + q2) - ddx*lb3*m1*cos(p) - ddx*lb3*m2*cos(p) - ddy*lb3*m1*sin(p) - ddy*lb3*m2*sin(p) - dq1^2*lb1*lb3*m1*sin(q1) - dq2^2*lb2*lb3*m2*sin(q2) + 2*ddp*lb1*lb3*m1*cos(q1) + 2*ddp*lb2*lb3*m2*cos(q2) + ddq1*lb1*lb3*m1*cos(q1) + ddq2*lb2*lb3*m2*cos(q2) - 2*dp*dq1*lb1*lb3*m1*sin(q1) - 2*dp*dq2*lb2*lb3*m2*sin(q2)
+
+
+qdd equations CM 2
+ddq1*(I1 + lb1^2*m1) - u1 + ddp*(I1 + lb1^2*m1 + lb1*lb3*m1*cos(q1)) - (981*lb1*m1*sin(p + q1))/100 - ddx*lb1*m1*cos(p + q1) - ddy*lb1*m1*sin(p + q1) + dp^2*lb1*lb3*m1*sin(q1)
+
+
+I2*ddp - u2 + I2*ddq2 + lam2X*lb2*cos(p + q2) + lam2X*le2*cos(p + q2) + lam2Y*lb2*sin(p + q2) + lam2Y*le2*sin(p + q2) - (981*lb2*m2*sin(p + q2))/100 + ddp*lb2^2*m2 + ddq2*lb2^2*m2 - ddx*lb2*m2*cos(p + q2) - ddy*lb2*m2*sin(p + q2) + dp^2*lb2*lb3*m2*sin(q2) + ddp*lb2*lb3*m2*cos(q2)
+
+
+ddx*m1 - lam2X + ddx*m2 + ddx*m3 - ddp*lb1*m1*cos(p + q1) - ddp*lb2*m2*cos(p + q2) - ddq1*lb1*m1*cos(p + q1) - ddq2*lb2*m2*cos(p + q2) - ddp*lb3*m1*cos(p) - ddp*lb3*m2*cos(p) + dp^2*lb1*m1*sin(p + q1) + dp^2*lb2*m2*sin(p + q2) + dq1^2*lb1*m1*sin(p + q1) + dq2^2*lb2*m2*sin(p + q2) + dp^2*lb3*m1*sin(p) + dp^2*lb3*m2*sin(p) + 2*dp*dq1*lb1*m1*sin(p + q1) + 2*dp*dq2*lb2*m2*sin(p + q2)
+
+
+(981*m1)/100 - lam2Y + (981*m2)/100 + (981*m3)/100 + ddy*m1 + ddy*m2 + ddy*m3 - ddp*lb1*m1*sin(p + q1) - ddp*lb2*m2*sin(p + q2) - ddq1*lb1*m1*sin(p + q1) - ddq2*lb2*m2*sin(p + q2) - ddp*lb3*m1*sin(p) - ddp*lb3*m2*sin(p) - dp^2*lb1*m1*cos(p + q1) - dp^2*lb2*m2*cos(p + q2) - dq1^2*lb1*m1*cos(p + q1) - dq2^2*lb2*m2*cos(p + q2) - dp^2*lb3*m1*cos(p) - dp^2*lb3*m2*cos(p) - 2*dp*dq1*lb1*m1*cos(p + q1) - 2*dp*dq2*lb2*m2*cos(p + q2)
+
+
+I1*ddp + I2*ddp + I3*ddp + I1*ddq1 + I2*ddq2 + lam2X*lb3*cos(p) + lam2Y*lb3*sin(p) - (981*lb3*m1*sin(p))/100 - (981*lb3*m2*sin(p))/100 + lam2X*lb2*cos(p + q2) + lam2X*le2*cos(p + q2) + lam2Y*lb2*sin(p + q2) + lam2Y*le2*sin(p + q2) - (981*lb1*m1*sin(p + q1))/100 - (981*lb2*m2*sin(p + q2))/100 + ddp*lb1^2*m1 + ddp*lb2^2*m2 + ddp*lb3^2*m1 + ddp*lb3^2*m2 + ddq1*lb1^2*m1 + ddq2*lb2^2*m2 - ddx*lb1*m1*cos(p + q1) - ddx*lb2*m2*cos(p + q2) - ddy*lb1*m1*sin(p + q1) - ddy*lb2*m2*sin(p + q2) - ddx*lb3*m1*cos(p) - ddx*lb3*m2*cos(p) - ddy*lb3*m1*sin(p) - ddy*lb3*m2*sin(p) - dq1^2*lb1*lb3*m1*sin(q1) - dq2^2*lb2*lb3*m2*sin(q2) + 2*ddp*lb1*lb3*m1*cos(q1) + 2*ddp*lb2*lb3*m2*cos(q2) + ddq1*lb1*lb3*m1*cos(q1) + ddq2*lb2*lb3*m2*cos(q2) - 2*dp*dq1*lb1*lb3*m1*sin(q1) - 2*dp*dq2*lb2*lb3*m2*sin(q2)
+
+
+qdd equations CM 12
+I1*ddp - u1 + I1*ddq1 + lam1X*lb1*cos(p + q1) + lam1X*le1*cos(p + q1) + lam1Y*lb1*sin(p + q1) + lam1Y*le1*sin(p + q1) - (981*lb1*m1*sin(p + q1))/100 + ddp*lb1^2*m1 + ddq1*lb1^2*m1 - ddx*lb1*m1*cos(p + q1) - ddy*lb1*m1*sin(p + q1) + dp^2*lb1*lb3*m1*sin(q1) + ddp*lb1*lb3*m1*cos(q1)
+
+
+I2*ddp - u2 + I2*ddq2 + lam2X*lb2*cos(p + q2) + lam2X*le2*cos(p + q2) + lam2Y*lb2*sin(p + q2) + lam2Y*le2*sin(p + q2) - (981*lb2*m2*sin(p + q2))/100 + ddp*lb2^2*m2 + ddq2*lb2^2*m2 - ddx*lb2*m2*cos(p + q2) - ddy*lb2*m2*sin(p + q2) + dp^2*lb2*lb3*m2*sin(q2) + ddp*lb2*lb3*m2*cos(q2)
+
+
+ddx*m1 - lam2X - lam1X + ddx*m2 + ddx*m3 - ddp*lb1*m1*cos(p + q1) - ddp*lb2*m2*cos(p + q2) - ddq1*lb1*m1*cos(p + q1) - ddq2*lb2*m2*cos(p + q2) - ddp*lb3*m1*cos(p) - ddp*lb3*m2*cos(p) + dp^2*lb1*m1*sin(p + q1) + dp^2*lb2*m2*sin(p + q2) + dq1^2*lb1*m1*sin(p + q1) + dq2^2*lb2*m2*sin(p + q2) + dp^2*lb3*m1*sin(p) + dp^2*lb3*m2*sin(p) + 2*dp*dq1*lb1*m1*sin(p + q1) + 2*dp*dq2*lb2*m2*sin(p + q2)
+
+
+(981*m1)/100 - lam2Y - lam1Y + (981*m2)/100 + (981*m3)/100 + ddy*m1 + ddy*m2 + ddy*m3 - ddp*lb1*m1*sin(p + q1) - ddp*lb2*m2*sin(p + q2) - ddq1*lb1*m1*sin(p + q1) - ddq2*lb2*m2*sin(p + q2) - ddp*lb3*m1*sin(p) - ddp*lb3*m2*sin(p) - dp^2*lb1*m1*cos(p + q1) - dp^2*lb2*m2*cos(p + q2) - dq1^2*lb1*m1*cos(p + q1) - dq2^2*lb2*m2*cos(p + q2) - dp^2*lb3*m1*cos(p) - dp^2*lb3*m2*cos(p) - 2*dp*dq1*lb1*m1*cos(p + q1) - 2*dp*dq2*lb2*m2*cos(p + q2)
+
+
+I1*ddp + I2*ddp + I3*ddp + I1*ddq1 + I2*ddq2 + lam1X*lb3*cos(p) + lam2X*lb3*cos(p) + lam1Y*lb3*sin(p) + lam2Y*lb3*sin(p) - (981*lb3*m1*sin(p))/100 - (981*lb3*m2*sin(p))/100 + lam1X*lb1*cos(p + q1) + lam2X*lb2*cos(p + q2) + lam1X*le1*cos(p + q1) + lam2X*le2*cos(p + q2) + lam1Y*lb1*sin(p + q1) + lam2Y*lb2*sin(p + q2) + lam1Y*le1*sin(p + q1) + lam2Y*le2*sin(p + q2) - (981*lb1*m1*sin(p + q1))/100 - (981*lb2*m2*sin(p + q2))/100 + ddp*lb1^2*m1 + ddp*lb2^2*m2 + ddp*lb3^2*m1 + ddp*lb3^2*m2 + ddq1*lb1^2*m1 + ddq2*lb2^2*m2 - ddx*lb1*m1*cos(p + q1) - ddx*lb2*m2*cos(p + q2) - ddy*lb1*m1*sin(p + q1) - ddy*lb2*m2*sin(p + q2) - ddx*lb3*m1*cos(p) - ddx*lb3*m2*cos(p) - ddy*lb3*m1*sin(p) - ddy*lb3*m2*sin(p) - dq1^2*lb1*lb3*m1*sin(q1) - dq2^2*lb2*lb3*m2*sin(q2) + 2*ddp*lb1*lb3*m1*cos(q1) + 2*ddp*lb2*lb3*m2*cos(q2) + ddq1*lb1*lb3*m1*cos(q1) + ddq2*lb2*lb3*m2*cos(q2) - 2*dp*dq1*lb1*lb3*m1*sin(q1) - 2*dp*dq2*lb2*lb3*m2*sin(q2)
+
+
