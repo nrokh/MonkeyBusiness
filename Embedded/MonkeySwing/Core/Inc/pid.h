@@ -29,7 +29,7 @@ typedef struct PID_Controller {
 	float d_ref_wt;
 
 	// Dynamic values
-	float prev_ref;	// Prevoius reference
+	float prev_ref;		// Previous reference
 	float prev_meas;	// Previous measurement
 	float i_sum;		// Error integral
 

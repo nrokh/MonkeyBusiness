@@ -34,12 +34,12 @@ typedef struct Motor {
 
 	// Feedback signals
 	uint16_t raw_pos;
-	int16_t pos;	// angular position feedback
-	int8_t num_turns;
-	int16_t vel;	// angular velocity feedback
-	int16_t cur;	// torque current feedback
+	int16_t pos;		// angular position feedback
+	int8_t num_turns;	// full rotation counter
+	int16_t vel;		// angular velocity feedback
+	int16_t cur;		// torque current feedback
 
-	int16_t vel_hist[NUM_VEL_STORE];
+	int16_t vel_hist[NUM_VEL_STORE];	// previous velocity for filtering (unused)
 
 	// Direction parameters
 	int8_t dir;		// direction scaling
