@@ -37,19 +37,17 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef enum {Init, Wait, Toggle, Power, Cal, Load, Password, Swing} State;
+typedef enum {Init, Wait, Toggle, Power, Cal, Gains, Load, Password, Swing} State;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-//#define TRAJ_FILE_STEPS 9	// Number of time steps in the trajectory
-#define TRAJ_FILE_BYTES 152880	// Trajectory file size, in units of bytes (MUST be the exact file size)
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-//#define TRAJ_FILE_BYTES (13 * 4 * TRAJ_FILE_STEPS)
-#define TRAJ_FILE_SIZE (TRAJ_FILE_BYTES / sizeof(traj_t))
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -60,20 +58,23 @@ PID_Controller vel_cntlrs[4];	// velocity PID controller
 PID_Controller motor_cntlrs[4];	// motor PID controller (technically voltage, whatever that means)
 int16_t ref[] = {0, 0, 0, 0};	// motor reference (for debugging)
 
-Motor motors[4];						// motors
-int8_t motor_dirs[4] = {1, -1, -1, 1};	// motor directions
-uint8_t motors_on = 0;					// indicates if motors are on (1) or off (2)
+Motor motors[4];									// motors
+int8_t motor_dirs[4] = {1, -1, -1, 1};				// motor directions
+uint16_t motor_offs[4] = {2737, 3986, 1292, 4173};	// motor zero angles
+uint8_t motors_on = 0;								// indicates if motors are on (1) or off (2)
 
-Trajectory traj;					// trajectory iterator
-uint8_t traj_arr[TRAJ_FILE_BYTES];	// raw trajectory file location
-uint8_t file_tx_done = 1;			// indicator for if trajectory file is actively being loaded or not (referenced by DMA callback)
-uint8_t swing_done = 1;				// indicator for if swing motion is completed
-uint8_t iter_traj = 0;				// indicator for if trajectory should be iterated during PID loop
+Trajectory traj;			// trajectory iterator
+uint8_t traj_arr[190000];	// raw trajectory file location
+uint32_t traj_bytes = 0;	// number of bytes in trajectory file
+uint32_t traj_size = 0;		// amount of trajectory data in file
+uint8_t traj_div = 1;		// divisor for file time step to 1ms
+uint8_t file_tx_done = 1;	// indicator for if trajectory file is actively being loaded or not (referenced by DMA callback)
+uint8_t swing_done = 1;		// indicator for if swing motion is completed
+uint8_t iter_traj = 0;		// indicator for if trajectory should be iterated during PID loop
+uint8_t traj_cnt = 0;		// counter to iterate to next trajectory step
 
-Gripper Gripper_1_Cal;	// gripper 1
-Gripper Gripper_2_Cal;	// gripper 2
-Gripper* release_hand;					// pointer to an active gripper, used during swing to reduce if-else pairs
-Gripper_Num release_num = Gripper_Null;	// indicator for which gripper will be released during swing
+Gripper Gripper_1_Cal;					// gripper 1
+Gripper Gripper_2_Cal;					// gripper 2
 
 State state = Init;	// main program state
 unsigned char cmd;	// UART command
@@ -85,6 +86,9 @@ unsigned char msg_wait[] = "Waiting for command\r\n";
 unsigned char msg_toggle[] = "Toggling gripper... ";
 unsigned char msg_power[] = "Toggling motor power... ";
 unsigned char msg_cal[] = "Zeroing motor positions... ";
+unsigned char msg_gain[] = "Waiting for PID file... ";
+unsigned char msg_size[] = "Specify file byte size... ";
+unsigned char msg_div[] = "Specify file time divisor... ";
 unsigned char msg_load[] = "Waiting for trajectory file... ";
 unsigned char msg_pwd[] = "Waiting for password (abc)... ";
 unsigned char msg_swing[] = "Starting swing... ";
@@ -93,7 +97,7 @@ unsigned char msg_swing[] = "Starting swing... ";
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-Gripper* get_release_hand(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -102,48 +106,41 @@ Gripper* get_release_hand(void);
   * @brief	PID controller update
   */
 void update_motor_cntl() {
+	// Check if trajectory is done
 	if(traj_is_finished(&traj) == 1) {
 		finish_traj();
 		return;
 	}
 
-	if(traj.cmode == 12) {
+	// Update gripper states accordingly
+	if(traj.cmode == 1) {
+		close_gripper(&Gripper_1_Cal);
+		open_gripper(&Gripper_2_Cal);
+	} else if(traj.cmode == 2) {
+		open_gripper(&Gripper_1_Cal);
 		close_gripper(&Gripper_2_Cal);
 	} else {
-		open_gripper(&Gripper_2_Cal);
+		close_gripper(&Gripper_1_Cal);
+		close_gripper(&Gripper_2_Cal);
 	}
 
-//	// Position controller update
-//	for(uint8_t i = 0; i < 4; ++i) {
-//		pid_update(&pos_cntlrs[i], traj.pos[i], motors[i].pos-motors[i].off);
-//	}
-//	// Velocity controller update
-//	for(uint8_t i = 0; i < 4; ++i) {
-//		pid_update(&vel_cntlrs[i], pos_cntlrs[i].u, motors[i].vel);
-////		pid_update(&vel_cntlrs[i], pos_cntlrs[i].u+traj.vel, motors[i].vel);
-//	}
-//	// Motor voltage controller update
-//	for(uint8_t i = 0; i < 4; ++i) {
-//		pid_update(&motor_cntlrs[i], vel_cntlrs[i].u, motors[i].cur);
-//		set_voltage(&motors[i], (int16_t) (motor_cntlrs[i].u+traj.torque[i]));
-//	}
+	// Get new PID outputs
 	for(uint8_t i = 0; i < 4; ++i) {
 		pid_update(&pos_cntlrs[i], traj.pos[i], (float) motors[i].pos*TICK_TO_RAD);
 		pid_update(&vel_cntlrs[i], traj.vel[i], (float) motors[i].vel*RPM_TO_RADpS);
-		pid_update(&motor_cntlrs[i], pos_cntlrs[i].u+vel_cntlrs[i].u, (float) motors[i].cur*MA_TO_NM+traj.torque[i]);
+		pid_update(&motor_cntlrs[i], pos_cntlrs[i].u+vel_cntlrs[i].u+traj.torque[i], (float) motors[i].cur*MA_TO_NM);
 		set_voltage(&motors[i], (int16_t) motor_cntlrs[i].u);
 	}
-
 	send_voltage(&hcan1, motors);
 
-	if(iter_traj)
-		update_traj(&traj);
+	// Iterate trajectory
+	if(iter_traj) {
+		if(++traj_cnt == traj_div){
+			update_traj(&traj);
+			traj_cnt = 0;
+		}
+	}
 
-//	for(uint8_t i = 0; i < 4; ++i) {
-//		pid_update(&motor_cntlrs[i], ref[i], motors[i].vel);
-//		set_voltage(&motors[i], (int16_t) motor_cntlrs[i].u);
-//	}
-//	send_voltage(&hcan1, motors);
 	return;
 }
 
@@ -151,21 +148,13 @@ void update_motor_cntl() {
   * @brief	Finish trajectory response
   */
 void finish_traj() {
-//	close_gripper(release_hand);	// close swinging gripper
-
 	// Disable timer interrupts
 	HAL_TIM_Base_Stop_IT(&htim9);
-//	HAL_TIM_Base_Stop_IT(&htim13);
 
 	reset_traj(&traj);	// reset trajectory iterator
+	traj_cnt = 0;
 
-	// Flip the gripper to be released
-	if(release_num == Gripper_1)
-		release_num = Gripper_2;
-	else
-		release_num = Gripper_1;
-
-	swing_done = 1;
+	swing_done = 1;	// indicate swing is done to move to wait state
 	return;
 }
 
@@ -190,26 +179,6 @@ void send_serial() {
 
 	HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
 	return;
-}
-
-/**
-  * @brief	Determine the gripper which is released during swing
-  */
-Gripper* get_release_hand() {
-	while(release_num == Gripper_Null) {
-		HAL_UART_Transmit(&huart2, "Specify release gripper\r\n", 26, 1000);
-		while(HAL_UART_Receive(&huart2, &cmd, 1, 100) != HAL_OK);
-
-		if(cmd == '1')
-			release_num = Gripper_1;
-		else if(cmd == '2')
-			release_num = Gripper_2;
-	}
-
-	if(release_num == Gripper_1)
-		return &Gripper_1_Cal;
-	else
-		return &Gripper_2_Cal;
 }
 /* USER CODE END 0 */
 
@@ -247,7 +216,6 @@ int main(void)
   MX_TIM9_Init();
   MX_TIM8_Init();
   MX_TIM12_Init();
-  MX_TIM13_Init();
   /* USER CODE BEGIN 2 */
 
   // Initialize PID controllers for position (outer-most loop of cascade architecture)
@@ -266,12 +234,13 @@ int main(void)
   for(uint8_t i = 0; i < 4; ++i)
 	  pid_init(&motor_cntlrs[i], 3000.0, 1250000.0, 0.0, 0.001, 30000.0, 30000.0, 1.0);
 
-  // Initialize trajectory structure
-  init_traj(&traj, &traj_arr[0], TRAJ_FILE_SIZE);
+
 
   // Initialize motors
-  for(uint8_t i = 0; i < 4; ++i)
+  for(uint8_t i = 0; i < 4; ++i) {
 	  motor_init(&motors[i], i+1, motor_dirs[i]);
+	  motors[i].off = motor_offs[i];
+  }
 
   // Finish CAN initialization for robot motors.
   can_motors_init(&hcan1);
@@ -314,6 +283,8 @@ int main(void)
 	  			  state = Toggle;
 	  		  else if(cmd == 'c' || cmd == 'C')
 	  			  state = Cal;
+	  		  else if(cmd == 'g' || cmd == 'G')
+	  			  state = Gains;
 	  		  else if(cmd == 'p' || cmd == 'P')
 	  			  state = Power;
 	  		  else if(cmd == 't' || cmd == 'T')
@@ -362,18 +333,55 @@ int main(void)
 	  		  state = Wait;	// return to wait state
 	  		  break;
 
+		  // Load new PID gains
+	  	  case Gains:
+	  		// Last wait for the actual file
+			  HAL_UART_Transmit(&huart2, msg_gain, sizeof(msg_gain), 1000);
+			  power_off_motors();
+			  float buff[21];
+			  uint8_t* buff_byte = (uint8_t*) &buff[0];
+			  while(HAL_UART_Receive(&huart2, buff_byte, 7*3*sizeof(float), 1000) != HAL_OK);
+			  for(uint8_t i = 0; i < 4; ++i)
+			  	  pid_init(&pos_cntlrs[i], buff[0], buff[1], buff[2], buff[3], buff[4], buff[5], buff[6]);
+			  for(uint8_t i = 0; i < 4; ++i)
+			  	  pid_init(&vel_cntlrs[i], buff[7], buff[8], buff[9], buff[10], buff[11], buff[12], buff[13]);
+			  for(uint8_t i = 0; i < 4; ++i)
+			  	  pid_init(&motor_cntlrs[i], buff[14], buff[15], buff[16], buff[17], buff[18], buff[19], buff[20]);
+			  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);
+			  state = Password;	// wait for correct sequence before turning on
+	  		  break;
+
 	  	  // Load trajectory state - wait until the trajectory file of the exact specified size is received over UART
 	  	  case Load:	// NOTE: Cannot receive a new command until the entire file is received
+	  		  // First get the number of bytes to load
+	  		  HAL_UART_Transmit(&huart2, msg_size, sizeof(msg_size), 1000);
+	  		  cmd = '0';
+	  		  traj_bytes = 0;
+	  		  while(cmd >= '0' && cmd <= '9') {
+	  			  traj_bytes = traj_bytes * 10 + (cmd - '0');
+	  			  while(HAL_UART_Receive(&huart2, &cmd, 1, 100) != HAL_OK);
+	  		  }
+	  		  init_traj(&traj, &traj_arr[0], traj_bytes/sizeof(traj_t));	// Initialize trajectory structure
+	  		  HAL_UART_Transmit(&huart2, "\r\n", 3, 1000);
+
+	  		  // Next get the trajectory file time divisor from 1ms
+	  		  HAL_UART_Transmit(&huart2, msg_div, sizeof(msg_div), 1000);
+			  cmd = '0';
+			  traj_div = 0;
+			  while(cmd >= '0' && cmd <= '9') {
+				  traj_div = traj_div * 10 + (cmd - '0');
+				  while(HAL_UART_Receive(&huart2, &cmd, 1, 100) != HAL_OK);
+			  }
+			  HAL_UART_Transmit(&huart2, "\r\n", 3, 1000);
+
+	  		  // Last wait for the actual file
 	  		  HAL_UART_Transmit(&huart2, msg_load, sizeof(msg_load), 1000);
 	  		  power_off_motors();
-//	  		  file_tx_done = 0;
-	  		  for(uint32_t ind = 0; ind < TRAJ_FILE_BYTES; ind += 0xffff) {
+	  		  for(uint32_t ind = 0; ind < traj_bytes; ind += 0xffff) {
 		  		  file_tx_done = 0;
-	  			  HAL_UART_Receive_DMA(&huart2, &traj_arr[ind], (TRAJ_FILE_BYTES-ind>0xffff ? 0xffff : TRAJ_FILE_BYTES-ind));
+	  			  HAL_UART_Receive_DMA(&huart2, &traj_arr[ind], (traj_bytes-ind>0xffff ? 0xffff : traj_bytes-ind));
 	  			  while(!file_tx_done);	// wait for transfer to finish
 	  		  }
-//	  		  HAL_UART_Receive_DMA(&huart2, &traj_arr[0], TRAJ_FILE_BYTES);	// Set up UART for file transfer
-//	  		  while(!file_tx_done);	// wait for transfer to finish
 	  		  reset_traj(&traj);	// Load in first set of data
 	  		  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);
 	  		  state = Password;	// wait for correct sequence before turning on
@@ -403,15 +411,12 @@ int main(void)
 
 	  	  // Swing state - Use PID to follow trajectory file
 	  	  case Swing:
-//	  		  release_hand = get_release_hand();	// determine gripper to be released
 	  		  HAL_UART_Transmit(&huart2, msg_swing, sizeof(msg_swing), 1000);
 	  		  swing_done = 0;
 	  		  iter_traj = 0;						// disable trajectory iteration
-//	  		  open_gripper(release_hand);			// release gripper, start swing
 	  		  HAL_TIM_Base_Start_IT(&htim9);		// enable timer interrupts for PID update
 	  		  HAL_Delay(2000);						// wait for motors to get to initial positions
 	  		  iter_traj = 1;						// allow trajectory to iterate
-//	  		  HAL_TIM_Base_Start_IT(&htim13);		// enable timer interrupts for gripper close
 	  		  while(!swing_done);
 	  		  HAL_UART_Transmit(&huart2, msg_done, sizeof(msg_done), 1000);
 	  		  state = Wait;	// return to wait state

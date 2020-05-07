@@ -26,17 +26,18 @@
   */
 typedef struct Motor {
 	// Motor identification
-	uint8_t id;			// Motor ID, as set on DIP switches (1 - 7)
-	uint16_t can_addr;	// Motor CAN address for reception
+	uint8_t id;			// motor ID, as set on DIP switches (1 - 7)
+	uint16_t can_addr;	// motor CAN address for reception
 
 	// Output signal
-	int16_t volt;	// Voltage control signal
+	int16_t volt;	// voltage control signal
 
 	// Feedback signals
-	int16_t pos;	// Angular position feedback
+	uint16_t raw_pos;
+	int16_t pos;	// angular position feedback
 	int8_t num_turns;
-	int16_t vel;	// Angular velocity feedback
-	int16_t cur;	// Torque current feedback
+	int16_t vel;	// angular velocity feedback
+	int16_t cur;	// torque current feedback
 
 	int16_t vel_hist[NUM_VEL_STORE];
 
@@ -46,6 +47,11 @@ typedef struct Motor {
 } Motor;
 
 // Function prototypes
+/**
+  * @brief	Initialize CAN settings for robot motors
+  */
+void can_motors_init(CAN_HandleTypeDef*);
+
 /**
   * @brief	Motor initialization
   */

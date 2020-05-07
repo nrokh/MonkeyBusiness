@@ -59,8 +59,12 @@ void send_serial();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define USART2_RX_Pin GPIO_PIN_6
+#define USART2_RX_GPIO_Port GPIOD
 #define CAN1_RX_Pin GPIO_PIN_0
 #define CAN1_RX_GPIO_Port GPIOD
+#define USART2_TX_Pin GPIO_PIN_5
+#define USART2_TX_GPIO_Port GPIOD
 #define CAN1_TX_Pin GPIO_PIN_1
 #define CAN1_TX_GPIO_Port GPIOD
 #define POWER1_CTRL_Pin GPIO_PIN_2
@@ -77,12 +81,8 @@ void send_serial();
 #define USART2_RTS_GPIO_Port GPIOA
 #define USART2_CTS_Pin GPIO_PIN_0
 #define USART2_CTS_GPIO_Port GPIOA
-#define USART2_TX_Pin GPIO_PIN_2
-#define USART2_TX_GPIO_Port GPIOA
 #define LED_RED_Pin GPIO_PIN_11
 #define LED_RED_GPIO_Port GPIOE
-#define USART2_RX_Pin GPIO_PIN_3
-#define USART2_RX_GPIO_Port GPIOA
 #define POT_Pin GPIO_PIN_1
 #define POT_GPIO_Port GPIOB
 #define LED_GREEN_Pin GPIO_PIN_14

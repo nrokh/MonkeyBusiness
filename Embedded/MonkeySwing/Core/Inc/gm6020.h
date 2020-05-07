@@ -17,7 +17,7 @@
 #define TICK_TO_RAD 7.6708403213033652507e-4
 #define RPM_TO_RADpS 1.047197551196597746e-1
 //#define MA_TO_NM 7.41e-4
-#define MA_TO_NM 1.5e-4
+#define MA_TO_NM 1.75e-4
 #define NUM_VEL_STORE 1
 
 // Structure definitions

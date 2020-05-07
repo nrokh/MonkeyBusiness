@@ -53,9 +53,9 @@
 PID_Controller torq_cntlrs[4];
 PID_Controller vel_cntlrs[4];
 PID_Controller pos_cntlrs[4];
-//float ref[] = {0.0f, 0.0f, 0.0f, 2.0f};
-//float ref[] = {0, 0, 0, 1.5707f};
-float ref[] = {0, 0, 0, 6.283f};
+float ref[] = {0, 0, 0, 0};
+uint16_t motor_offs[4] = {2737, 3986, 1292, 4173};
+int8_t motor_dirs[4] = {1, -1, -1, 1};
 Motor motors[4];
 uint16_t pot_hist[100];
 int16_t avgtrack;
@@ -73,31 +73,35 @@ void SystemClock_Config(void);
   * @brief	PID controller update
   */
 void motor_cntl_update() {
-	int32_t avg = 0;
-	for(uint8_t i = 99; i > 0; --i)
-		pot_hist[i] = pot_hist[i-1];
-	pot_hist[0] = get_pot_value(&hadc1);
-
-	for(uint8_t i = 0; i < 100; ++i)
-		avg += pot_hist[i];
-	avg /= 100;
-
+	// Uncomment to use potentiometer as reference
+//	int32_t avg = 0;
+//	for(uint8_t i = 99; i > 0; --i)
+//		pot_hist[i] = pot_hist[i-1];
+//	pot_hist[0] = get_pot_value(&hadc1);
+//
+//	for(uint8_t i = 0; i < 100; ++i)
+//		avg += pot_hist[i];
+//	avg /= 100;
 //	ref[3] = (float) (avg-2048) * 8 * TICK_TO_RAD;
+
 	for(uint8_t i = 0; i < 4; ++i) {
 //		pid_update(&torq_cntlrs[i], ref[i], (float) motors[i].cur*MA_TO_NM);
 
-		pid_update(&vel_cntlrs[i], ref[i], (float) motors[i].vel*RPM_TO_RADpS);
-//		pid_update(&pos_cntlrs[i], ref[i], (float) motors[i].pos*TICK_TO_RAD);
+//		pid_update(&vel_cntlrs[i], ref[i], (float) motors[i].vel*RPM_TO_RADpS);
+		pid_update(&pos_cntlrs[i], ref[i], (float) motors[i].pos*TICK_TO_RAD);
 
-		pid_update(&torq_cntlrs[i], vel_cntlrs[i].u, (float) motors[i].cur*MA_TO_NM);
-		set_voltage(&motors[i], (int16_t) torq_cntlrs[i].u);
+		pid_update(&torq_cntlrs[i], pos_cntlrs[i].u, (float) motors[i].cur*MA_TO_NM);
+
+		if(i == 3)
+			set_voltage(&motors[i], (int16_t) torq_cntlrs[i].u);
 	}
 	send_voltage(&hcan1, motors);
 
-	unsigned char byte_ptr[16];
-	sprintf(&byte_ptr[0], "%6d,%6d\r\n", (int16_t)(ref[3]/RPM_TO_RADpS), motors[3].vel);
+	// Uncomment to capture data for analysis
+//	unsigned char byte_ptr[16];
+//	sprintf(&byte_ptr[0], "%6d,%6d\r\n", (int16_t)(ref[3]/RPM_TO_RADpS), motors[3].vel);
 //	sprintf(&byte_ptr[0], "%6d,%6d\r\n", (int16_t)(ref[3]/MA_TO_NM), motors[3].cur);	// current, size 16
-	HAL_UART_Transmit(&huart2, byte_ptr, 16, HAL_MAX_DELAY);
+//	HAL_UART_Transmit(&huart2, byte_ptr, 16, HAL_MAX_DELAY);
 
 	return;
 }
@@ -106,12 +110,15 @@ void motor_cntl_update() {
   * @brief	Send some info over USART
   */
 void send_serial() {
-	unsigned char byte_ptr[28];
+	unsigned char byte_ptr[30];
 	uint8_t len = sizeof(byte_ptr) / sizeof(byte_ptr[0]);
 
+	// Uncomment to toggle the reference sign
 //	ref[3] *= -1;
 
-	sprintf(&byte_ptr[0], "%6d\t%6d\t%4d\t%6d\r\n", motors[3].volt, motors[3].cur, motors[3].vel, motors[3].pos);
+//	sprintf(&byte_ptr[0], "%6d\t%6d\t%6d\t%6d\r\n", motors[0].raw_pos, motors[1].raw_pos, motors[2].raw_pos, motors[3].raw_pos);
+	sprintf(&byte_ptr[0], "%6d\t%6d\t%6d\t%6d\r\n", motors[0].pos, motors[1].pos, motors[2].pos, motors[3].pos);
+//	sprintf(&byte_ptr[0], "%6d\t%6d\t%6d\t%6d\r\n", motors[3].volt, motors[3].cur, motors[3].vel, motors[3].pos);
 
 	HAL_UART_Transmit(&huart2, byte_ptr, len, HAL_MAX_DELAY);	// Send data
 
@@ -157,17 +164,24 @@ int main(void)
   // Initialize PID controllers
   for(uint8_t i = 0; i < 4; ++i) {
 //	  pid_init(&pos_cntlrs[i], 100.0f, 10.0f, 8.0f, 0.001f, 2.0f, 5.0f, 1.0f);
-	  pid_init(&pos_cntlrs[i], 1.0f, 0.5f, 0.055f, 0.001f, 2.0f, 5.0f, 1.0f);
-	  pid_init(&vel_cntlrs[i], 0.08f, 50.0f, 0.0f, 0.001f, 2.0f, 5.0f, 1.0f);
 //	  pid_init(&torq_cntlrs[i], 50.0f, 10000.0f, 0.0f, 0.001f, 30000.0f, 30000.0f, 1.0f);
-	  pid_init(&torq_cntlrs[i], 3000.0f, 1250000.0f, 0.0f, 0.001f, 30000.0f, 30000.0f, 1.0f);
+
+//	  pid_init(&pos_cntlrs[i], 1.0f, 0.5f, 0.055f, 0.001f, 2.0f, 5.0f, 1.0f);
+//	  pid_init(&vel_cntlrs[i], 0.08f, 50.0f, 0.0f, 0.001f, 2.0f, 5.0f, 1.0f);
+
+//	  pid_init(&pos_cntlrs[i], 0.0f, 0.0f, 0.0f, 0.001f, 2.0f, 5.0f, 1.0f);
+//	  pid_init(&torq_cntlrs[i], 300.0f, 125000.0f, 0.0f, 0.001f, 30000.0f, 30000.0f, 1.0f);
+
+	  pid_init(&pos_cntlrs[i], 200.0f, 0.001f, 0.00006f, 0.001f, 2.0f, 5.0f, 1.0f);
+	  pid_init(&torq_cntlrs[i], 160.0f, 0.0f, 0.00006f, 0.001f, 30000.0f, 30000.0f, 1.0f);
 //  pid_init(&cntlrs[i], 40, 3000, 0, 0.001, 30000, 30000, 1);
   }
 
   // Initialize motors
-  for(uint8_t i = 0; i < 4; ++i)
-	  motor_init(&motors[i], i+1, -1);
-  motors[3].off = 4249;
+  for(uint8_t i = 0; i < 4; ++i) {
+	  motor_init(&motors[i], i+1, motor_dirs[i]);
+	  motors[i].off = motor_offs[i];
+  }
 
   // Finish CAN initialization for robot motors.
   can_motors_init(&hcan1);

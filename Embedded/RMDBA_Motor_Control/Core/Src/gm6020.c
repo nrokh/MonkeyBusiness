@@ -5,6 +5,30 @@
 #include "gm6020.h"
 
 /**
+  * @brief	Initializes the CAN filter & interrupts for the robot motors.
+  * @param	hcan CAN handle
+  */
+void can_motors_init(CAN_HandleTypeDef* hcan) {
+	// Set up the CAN reception filter
+	CAN_FilterTypeDef hfilter;
+	hfilter.FilterActivation = CAN_FILTER_ENABLE;		// Enable filtering
+	hfilter.FilterBank = 0;								// Configure filter 0
+	hfilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;	// Filter to RX FIFO 0
+	hfilter.FilterMode = CAN_FILTERMODE_IDMASK;			// Configure in mask mode
+	hfilter.FilterScale = CAN_FILTERSCALE_16BIT;		// Configure in 16-bit mode
+	hfilter.FilterMaskIdHigh = 0x0000;					// Accept all messages
+	hfilter.FilterIdHigh = 0x0000;
+	HAL_CAN_ConfigFilter(hcan, &hfilter);
+
+	// Set up CAN interrupts
+	// TX - Mailbox empty
+	// RX - FIFO 0 message pending
+	HAL_CAN_ActivateNotification(hcan, (CAN_IT_TX_MAILBOX_EMPTY | CAN_IT_RX_FIFO0_MSG_PENDING));
+
+	return;
+}
+
+/**
   * @brief	Initializes the motor with the given ID.
   * @param	motor Motor structure handle
   * @param	id Motor ID set on DIP switches (1 - 7)
@@ -15,6 +39,7 @@ void motor_init(Motor* m, uint8_t id, uint8_t dir) {
 
 	m->volt = 0;
 
+	m->raw_pos = 0;
 	m->pos = 0;
 	m->num_turns = 0;
 	m->vel = 0;
@@ -32,14 +57,11 @@ void motor_init(Motor* m, uint8_t id, uint8_t dir) {
   * @param	v Voltage command
   */
 void set_voltage(Motor* m, int16_t v) {
-	// Limit command to allowable range
 	if(v > VOLT_MAX)
 		v = VOLT_MAX;
 	else if(v < VOLT_MIN)
 		v = VOLT_MIN;
-
 	m->volt = v * m->dir;
-
 	return;
 }
 
@@ -78,7 +100,7 @@ void send_voltage(CAN_HandleTypeDef* hcan, Motor* m_ptr) {
 }
 
 /**
-  * @brief	Receive sensor feedback from a motor over CAN
+  * @brief	Receive sensor feedback from a motor over CAN. Used by CAN RX0 interrupt.
   * @param	hcan CAN handle
   */
 void update_meas(CAN_HandleTypeDef* hcan) {
@@ -97,29 +119,34 @@ void update_meas(CAN_HandleTypeDef* hcan) {
 	// Update motor feedback values
 	ind = hrx.StdId - CAN_ID_RCV_BASE - 1;
 
+	// Store previous position to check for wrap-around
 	old_pos = motors[ind].pos;
 
+	// Shift velocity history
 	for(uint8_t i = NUM_VEL_STORE-1; i > 0; --i)
 		motors[ind].vel_hist[i] = motors[ind].vel_hist[i-1];
 
-	motors[ind].pos = (int16_t) (((uint16_t) data[0]) << 8 | data[1]) - motors[ind].off;
-//	motors[ind].pos = (int16_t) (((uint16_t) data[0]) << 8 | data[1]) + motors[ind].num_turns*8192;
+	motors[ind].raw_pos = ((uint16_t) data[0]) << 8 | data[1];					// Get raw position angle
 	motors[ind].vel_hist[0] = (int16_t) (((uint16_t) data[2]) << 8 | data[3]);
 	motors[ind].cur = (int16_t) (((uint16_t) data[4]) << 8 | data[5]);
 
+	// Find new average velocity
 	motors[ind].vel = 0;
 	for(uint8_t i = 0; i < NUM_VEL_STORE; ++i)
 		motors[ind].vel += motors[ind].vel_hist[i];
 	motors[ind].vel /= NUM_VEL_STORE;
 
+	// Modify data if motor is negative
 	if(motors[ind].dir == -1) {
-		motors[ind].pos = 8191 - motors[ind].pos;
-		motors[ind].vel *= -1;
-		motors[ind].cur *= -1;
+		motors[ind].raw_pos = 8191 - motors[ind].raw_pos;	// complement raw angle
+		motors[ind].vel *= -1;								// negate velocity
+		motors[ind].cur *= -1;								// negate current
 	}
 
-	motors[ind].pos += motors[ind].num_turns * 8192;	// Incorporate angle wrapping
+	motors[ind].pos = motors[ind].raw_pos - motors[ind].off;	// Add zeroing offset
+	motors[ind].pos += motors[ind].num_turns * 8192;			// Incorporate angle wrapping
 
+	// Check for angle wrapping
 	if(motors[ind].pos - old_pos > 8000) {
 		--motors[ind].num_turns;
 		motors[ind].pos -= 8192;
@@ -135,6 +162,7 @@ void update_meas(CAN_HandleTypeDef* hcan) {
   */
 void power_on_motors() {
 	HAL_GPIO_WritePin(GPIOH, (POWER1_CTRL_Pin | POWER2_CTRL_Pin | POWER3_CTRL_Pin | POWER4_CTRL_Pin), GPIO_PIN_SET);
+	HAL_Delay(500);	// Give motors some time to turn on, otherwise will jerk on startup
 	return;
 }
 

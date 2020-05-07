@@ -21,29 +21,6 @@
 #include "can.h"
 
 /* USER CODE BEGIN 0 */
-/**
-  * @brief	Initializes the CAN filter & interrupts for the robot motors.
-  * @param	hcan CAN handle
-  */
-void can_motors_init(CAN_HandleTypeDef* hcan) {
-	// Set up the CAN reception filter
-	CAN_FilterTypeDef hfilter;
-	hfilter.FilterActivation = CAN_FILTER_ENABLE;		// Enable filtering
-	hfilter.FilterBank = 0;								// Configure filter 0
-	hfilter.FilterFIFOAssignment = CAN_FILTER_FIFO0;	// Filter to RX FIFO 0
-	hfilter.FilterMode = CAN_FILTERMODE_IDMASK;			// Configure in mask mode
-	hfilter.FilterScale = CAN_FILTERSCALE_16BIT;		// Configure in 16-bit mode
-	hfilter.FilterMaskIdHigh = 0x0000;					// Accept all messages
-	hfilter.FilterIdHigh = 0x0000;
-	HAL_CAN_ConfigFilter(hcan, &hfilter);
-
-	// Set up CAN interrupts
-	// TX - Mailbox empty
-	// RX - FIFO 0 message pending
-	HAL_CAN_ActivateNotification(hcan, (CAN_IT_TX_MAILBOX_EMPTY | CAN_IT_RX_FIFO0_MSG_PENDING));
-
-	return;
-}
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
 	update_meas(hcan);

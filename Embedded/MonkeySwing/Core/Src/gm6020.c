@@ -140,8 +140,8 @@ void update_meas(CAN_HandleTypeDef* hcan) {
 		motors[ind].cur *= -1;								// negate current
 	}
 
-	motors[ind].pos = motors[ind].raw_pos - motors[ind].off;	// Add zeroing offset
-	motors[ind].pos += motors[ind].num_turns * 8192;			// Incorporate angle wrapping
+	motors[ind].pos = motors[ind].raw_pos - motors[ind].off;	// add zeroing offset
+	motors[ind].pos += motors[ind].num_turns * 8192;			// incorporate angle wrapping
 
 	// Check for angle wrapping
 	if(motors[ind].pos - old_pos > 8000) {
@@ -159,7 +159,7 @@ void update_meas(CAN_HandleTypeDef* hcan) {
   */
 void power_on_motors() {
 	HAL_GPIO_WritePin(GPIOH, (POWER1_CTRL_Pin | POWER2_CTRL_Pin | POWER3_CTRL_Pin | POWER4_CTRL_Pin), GPIO_PIN_SET);
-	HAL_Delay(500);	// Give motors some time to turn on, otherwise will jerk on startup
+	HAL_Delay(500);	// give motors some time to turn on, otherwise will jerk on startup
 	return;
 }
 
